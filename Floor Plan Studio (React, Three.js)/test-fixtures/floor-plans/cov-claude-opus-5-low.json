@@ -1,0 +1,607 @@
+{
+  "rooms": [
+    {
+      "name": "Living",
+      "polygon": [
+        {
+          "x": 0.49,
+          "y": 0.03
+        },
+        {
+          "x": 0.88,
+          "y": 0.03
+        },
+        {
+          "x": 0.88,
+          "y": 0.4
+        },
+        {
+          "x": 0.75,
+          "y": 0.4
+        },
+        {
+          "x": 0.75,
+          "y": 0.48
+        },
+        {
+          "x": 0.49,
+          "y": 0.48
+        }
+      ],
+      "widthIn": 173,
+      "depthIn": 198
+    },
+    {
+      "name": "Kitchen",
+      "polygon": [
+        {
+          "x": 0.42,
+          "y": 0.35
+        },
+        {
+          "x": 0.75,
+          "y": 0.35
+        },
+        {
+          "x": 0.75,
+          "y": 0.52
+        },
+        {
+          "x": 0.42,
+          "y": 0.52
+        }
+      ],
+      "widthIn": 110,
+      "depthIn": 207
+    },
+    {
+      "name": "Hall",
+      "polygon": [
+        {
+          "x": 0.12,
+          "y": 0.35
+        },
+        {
+          "x": 0.42,
+          "y": 0.35
+        },
+        {
+          "x": 0.42,
+          "y": 0.8
+        },
+        {
+          "x": 0.3,
+          "y": 0.8
+        },
+        {
+          "x": 0.3,
+          "y": 0.87
+        },
+        {
+          "x": 0.12,
+          "y": 0.87
+        }
+      ],
+      "widthIn": 0,
+      "depthIn": 0
+    },
+    {
+      "name": "Closet",
+      "polygon": [
+        {
+          "x": 0.12,
+          "y": 0.45
+        },
+        {
+          "x": 0.29,
+          "y": 0.45
+        },
+        {
+          "x": 0.29,
+          "y": 0.5
+        },
+        {
+          "x": 0.12,
+          "y": 0.5
+        }
+      ],
+      "widthIn": 0,
+      "depthIn": 0
+    },
+    {
+      "name": "Mech",
+      "polygon": [
+        {
+          "x": 0.42,
+          "y": 0.54
+        },
+        {
+          "x": 0.5,
+          "y": 0.54
+        },
+        {
+          "x": 0.5,
+          "y": 0.6
+        },
+        {
+          "x": 0.42,
+          "y": 0.6
+        }
+      ],
+      "widthIn": 0,
+      "depthIn": 0
+    },
+    {
+      "name": "W/D",
+      "polygon": [
+        {
+          "x": 0.42,
+          "y": 0.61
+        },
+        {
+          "x": 0.5,
+          "y": 0.61
+        },
+        {
+          "x": 0.5,
+          "y": 0.67
+        },
+        {
+          "x": 0.42,
+          "y": 0.67
+        }
+      ],
+      "widthIn": 0,
+      "depthIn": 0
+    },
+    {
+      "name": "Closet 2",
+      "polygon": [
+        {
+          "x": 0.52,
+          "y": 0.54
+        },
+        {
+          "x": 0.58,
+          "y": 0.54
+        },
+        {
+          "x": 0.58,
+          "y": 0.67
+        },
+        {
+          "x": 0.52,
+          "y": 0.67
+        }
+      ],
+      "widthIn": 0,
+      "depthIn": 0
+    },
+    {
+      "name": "Pantry",
+      "polygon": [
+        {
+          "x": 0.755,
+          "y": 0.475
+        },
+        {
+          "x": 0.785,
+          "y": 0.475
+        },
+        {
+          "x": 0.785,
+          "y": 0.53
+        },
+        {
+          "x": 0.755,
+          "y": 0.53
+        }
+      ],
+      "widthIn": 0,
+      "depthIn": 0
+    },
+    {
+      "name": "Bedroom 1",
+      "polygon": [
+        {
+          "x": 0.59,
+          "y": 0.54
+        },
+        {
+          "x": 0.885,
+          "y": 0.54
+        },
+        {
+          "x": 0.885,
+          "y": 0.755
+        },
+        {
+          "x": 0.59,
+          "y": 0.755
+        }
+      ],
+      "widthIn": 129,
+      "depthIn": 135
+    },
+    {
+      "name": "Bedroom 2",
+      "polygon": [
+        {
+          "x": 0.57,
+          "y": 0.77
+        },
+        {
+          "x": 0.885,
+          "y": 0.77
+        },
+        {
+          "x": 0.885,
+          "y": 0.99
+        },
+        {
+          "x": 0.57,
+          "y": 0.99
+        }
+      ],
+      "widthIn": 132,
+      "depthIn": 135
+    },
+    {
+      "name": "Desk",
+      "polygon": [
+        {
+          "x": 0.42,
+          "y": 0.755
+        },
+        {
+          "x": 0.57,
+          "y": 0.755
+        },
+        {
+          "x": 0.57,
+          "y": 0.79
+        },
+        {
+          "x": 0.42,
+          "y": 0.79
+        }
+      ],
+      "widthIn": 0,
+      "depthIn": 0
+    },
+    {
+      "name": "Bath",
+      "polygon": [
+        {
+          "x": 0.12,
+          "y": 0.68
+        },
+        {
+          "x": 0.3,
+          "y": 0.68
+        },
+        {
+          "x": 0.3,
+          "y": 0.86
+        },
+        {
+          "x": 0.12,
+          "y": 0.86
+        }
+      ],
+      "widthIn": 0,
+      "depthIn": 0
+    },
+    {
+      "name": "WH",
+      "polygon": [
+        {
+          "x": 0.245,
+          "y": 0.79
+        },
+        {
+          "x": 0.3,
+          "y": 0.79
+        },
+        {
+          "x": 0.3,
+          "y": 0.85
+        },
+        {
+          "x": 0.245,
+          "y": 0.85
+        }
+      ],
+      "widthIn": 0,
+      "depthIn": 0
+    },
+    {
+      "name": "Bath 2",
+      "polygon": [
+        {
+          "x": 0.12,
+          "y": 0.87
+        },
+        {
+          "x": 0.4,
+          "y": 0.87
+        },
+        {
+          "x": 0.4,
+          "y": 0.99
+        },
+        {
+          "x": 0.12,
+          "y": 0.99
+        }
+      ],
+      "widthIn": 0,
+      "depthIn": 0
+    },
+    {
+      "name": "Closet 3",
+      "polygon": [
+        {
+          "x": 0.42,
+          "y": 0.88
+        },
+        {
+          "x": 0.56,
+          "y": 0.88
+        },
+        {
+          "x": 0.56,
+          "y": 0.99
+        },
+        {
+          "x": 0.42,
+          "y": 0.99
+        }
+      ],
+      "widthIn": 0,
+      "depthIn": 0
+    }
+  ],
+  "doors": [
+    {
+      "x": 0.16,
+      "y": 0.35,
+      "widthIn": 36,
+      "connects": [
+        "Hall"
+      ]
+    },
+    {
+      "x": 0.21,
+      "y": 0.45,
+      "widthIn": 32,
+      "connects": [
+        "Hall",
+        "Closet"
+      ]
+    },
+    {
+      "x": 0.42,
+      "y": 0.57,
+      "widthIn": 28,
+      "connects": [
+        "Hall",
+        "Mech"
+      ]
+    },
+    {
+      "x": 0.42,
+      "y": 0.64,
+      "widthIn": 28,
+      "connects": [
+        "Hall",
+        "W/D"
+      ]
+    },
+    {
+      "x": 0.555,
+      "y": 0.6,
+      "widthIn": 28,
+      "connects": [
+        "Bedroom 1",
+        "Closet 2"
+      ]
+    },
+    {
+      "x": 0.6,
+      "y": 0.6,
+      "widthIn": 32,
+      "connects": [
+        "Hall",
+        "Bedroom 1"
+      ]
+    },
+    {
+      "x": 0.42,
+      "y": 0.71,
+      "widthIn": 32,
+      "connects": [
+        "Hall",
+        "Bath"
+      ]
+    },
+    {
+      "x": 0.32,
+      "y": 0.82,
+      "widthIn": 32,
+      "connects": [
+        "Hall",
+        "Bath"
+      ]
+    },
+    {
+      "x": 0.32,
+      "y": 0.87,
+      "widthIn": 32,
+      "connects": [
+        "Hall",
+        "Bath 2"
+      ]
+    },
+    {
+      "x": 0.46,
+      "y": 0.88,
+      "widthIn": 32,
+      "connects": [
+        "Bedroom 2",
+        "Closet 3"
+      ]
+    },
+    {
+      "x": 0.56,
+      "y": 0.88,
+      "widthIn": 32,
+      "connects": [
+        "Hall",
+        "Bedroom 2"
+      ]
+    }
+  ],
+  "windows": [
+    {
+      "x": 0.878,
+      "y": 0.21,
+      "widthIn": 60,
+      "room": "Living"
+    },
+    {
+      "x": 0.878,
+      "y": 0.29,
+      "widthIn": 60,
+      "room": "Living"
+    },
+    {
+      "x": 0.878,
+      "y": 0.6,
+      "widthIn": 48,
+      "room": "Bedroom 1"
+    },
+    {
+      "x": 0.878,
+      "y": 0.68,
+      "widthIn": 48,
+      "room": "Bedroom 1"
+    },
+    {
+      "x": 0.878,
+      "y": 0.86,
+      "widthIn": 60,
+      "room": "Bedroom 2"
+    }
+  ],
+  "fixtures": [
+    {
+      "type": "fridge",
+      "x": 0.455,
+      "y": 0.5,
+      "widthIn": 36,
+      "depthIn": 30,
+      "facing": "down",
+      "room": "Kitchen"
+    },
+    {
+      "type": "stove",
+      "x": 0.575,
+      "y": 0.5,
+      "widthIn": 30,
+      "depthIn": 26,
+      "facing": "down",
+      "room": "Kitchen"
+    },
+    {
+      "type": "kitchen_counter",
+      "x": 0.64,
+      "y": 0.5,
+      "widthIn": 110,
+      "depthIn": 26,
+      "facing": "down",
+      "room": "Kitchen"
+    },
+    {
+      "type": "kitchen_island",
+      "x": 0.645,
+      "y": 0.39,
+      "widthIn": 84,
+      "depthIn": 40,
+      "facing": "down",
+      "room": "Kitchen"
+    },
+    {
+      "type": "washer_dryer",
+      "x": 0.46,
+      "y": 0.64,
+      "widthIn": 30,
+      "depthIn": 30,
+      "facing": "left",
+      "room": "W/D"
+    },
+    {
+      "type": "toilet",
+      "x": 0.155,
+      "y": 0.71,
+      "widthIn": 20,
+      "depthIn": 26,
+      "facing": "right",
+      "room": "Bath"
+    },
+    {
+      "type": "sink_vanity",
+      "x": 0.25,
+      "y": 0.71,
+      "widthIn": 40,
+      "depthIn": 22,
+      "facing": "down",
+      "room": "Bath"
+    },
+    {
+      "type": "shower",
+      "x": 0.175,
+      "y": 0.81,
+      "widthIn": 40,
+      "depthIn": 40,
+      "facing": "right",
+      "room": "Bath"
+    },
+    {
+      "type": "shower",
+      "x": 0.16,
+      "y": 0.92,
+      "widthIn": 40,
+      "depthIn": 40,
+      "facing": "right",
+      "room": "Bath 2"
+    },
+    {
+      "type": "toilet",
+      "x": 0.235,
+      "y": 0.955,
+      "widthIn": 20,
+      "depthIn": 26,
+      "facing": "up",
+      "room": "Bath 2"
+    },
+    {
+      "type": "sink_vanity",
+      "x": 0.33,
+      "y": 0.96,
+      "widthIn": 40,
+      "depthIn": 22,
+      "facing": "up",
+      "room": "Bath 2"
+    },
+    {
+      "type": "desk",
+      "x": 0.49,
+      "y": 0.77,
+      "widthIn": 60,
+      "depthIn": 24,
+      "facing": "down",
+      "room": "Desk"
+    }
+  ]
+}
