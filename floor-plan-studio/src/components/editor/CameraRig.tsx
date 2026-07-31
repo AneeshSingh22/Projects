@@ -68,6 +68,9 @@ export function CameraRig({
   orbitControlsRef: React.RefObject<OrbitControlsImpl | null>;
 }) {
   const { camera } = useThree();
+  // Dev-only handle so browser-driven tests can read the real player position instead of guessing
+  // from pixels. Stripped from production builds.
+  if (import.meta.env.DEV) (window as unknown as { __cam?: unknown }).__cam = camera;
   const keys = useRef<Record<string, boolean>>({});
   const prevMode = useRef(mode);
   const velocity = useRef({ x: 0, z: 0 });
