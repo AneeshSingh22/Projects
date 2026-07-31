@@ -3,11 +3,18 @@
 ## One-time setup
 
 1. Push this repo to GitHub.
-2. At [vercel.com/new](https://vercel.com/new), import the repo. Vercel detects Vite and reads
-   `vercel.json` — no manual build settings needed.
-3. **Do not set `ANTHROPIC_API_KEY`** in Vercel's environment variables. The deployed site is
+2. At [vercel.com/new](https://vercel.com/new), import the repo.
+3. Set **Root Directory** to `floor-plan-studio`. This project lives in a subfolder of a
+   multi-project repo, so Vercel needs to be told where it starts.
+4. Leave the build settings alone — Vercel detects Vite and reads `vercel.json`.
+5. **Do not set `ANTHROPIC_API_KEY`** in Vercel's environment variables. The deployed site is
    deliberately key-less: every visitor supplies their own key, so nobody can spend yours.
-4. Deploy. Your link is ready to share.
+6. Deploy. Your link is ready to share.
+
+> **The folder name must not contain spaces.** Vercel derives serverless function names from the
+> file path and rejects any containing a space, which fails the build *after* the frontend
+> compiles successfully — the error names the function, not the folder, so it reads confusingly:
+> `A Serverless Function has an invalid name: "…/api/analyze-floor-plan.js"`.
 
 ## What visitors get
 

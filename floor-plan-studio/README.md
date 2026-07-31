@@ -109,7 +109,7 @@ Requires **Node.js 20+**.
 
 ```bash
 git clone https://github.com/AneeshSingh22/Projects.git
-cd "Projects/Floor Plan Studio (React, Three.js)"
+cd Projects/floor-plan-studio
 npm install
 npm run dev
 ```
@@ -152,9 +152,12 @@ which serverless functions can't. See `DEPLOY.md`.
 
 ### Deploying your own copy
 
-See [`DEPLOY.md`](./DEPLOY.md). The short version: import the repo on Vercel, set the root
-directory to this folder, and **do not** set `ANTHROPIC_API_KEY` — the site is deliberately
-key-less so each visitor spends their own credit rather than yours.
+See [`DEPLOY.md`](./DEPLOY.md). The short version: import the repo on Vercel, set the **Root
+Directory** to `floor-plan-studio`, and **do not** set `ANTHROPIC_API_KEY` — the site is
+deliberately key-less so each visitor spends their own credit rather than yours.
+
+The folder name has no spaces on purpose: Vercel derives serverless function names from the path
+and rejects any that contain one.
 
 ## What the AI reads from a floor plan
 
