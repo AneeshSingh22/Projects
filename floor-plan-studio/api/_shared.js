@@ -4,8 +4,8 @@
 //   - server/index.js      local dev (Express, long-running, can drive a headless browser)
 //   - api/*.js             Vercel serverless functions for the deployed site
 //
-// Model/effort defaults live here too. `high` effort produced the cleanest room shapes and
-// adjacency; see docs/floor-plan-gap-filling-spec.md for the benchmark behind that choice.
+// Model/effort defaults live here too; see docs/floor-plan-gap-filling-spec.md for the benchmark
+// behind each choice.
 
 export const MODEL = process.env.ANTHROPIC_MODEL || 'claude-opus-5';
 // `medium` is the cost/quality compromise for a public demo: measured at ~$0.26 vs ~$0.51 at
