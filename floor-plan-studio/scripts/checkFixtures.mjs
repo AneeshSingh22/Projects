@@ -24,7 +24,7 @@ for (const f of d.fixtures) {
   const room = d.spaces.find((s) => inPoly(s.polygon, f.center.x, f.center.z));
   const outside = corners.filter(([x, z]) => !room || !inPoly(room.polygon, x, z));
   // Doorway clearance: does the fixture's footprint overlap the walk-through corridor of a door?
-  // The corridor is the door's width along the wall, extended 24in either side of the wall line.
+  // The corridor is the door's width along the wall, extended 12in either side of the wall line.
   const x0 = f.center.x - w / 2, x1 = f.center.x + w / 2;
   const z0 = f.center.z - dp / 2, z1 = f.center.z + dp / 2;
   // Openings >= 72in dissolve their wall entirely (open plan), so nothing "blocks" them — the
@@ -32,10 +32,10 @@ for (const f of d.fixtures) {
   const blocked = d.doors.filter((dr) => dr.widthIn < 72).filter((dr) => {
     // Infer wall axis: the door lies on a room boundary, so one coord is on a shared wall line.
     const onVertical = d.spaces.some((s) => s.polygon.some((p) => Math.abs(p.x - dr.center.x) < 1));
-    const dx0 = onVertical ? dr.center.x - 24 : dr.center.x - dr.widthIn / 2;
-    const dx1 = onVertical ? dr.center.x + 24 : dr.center.x + dr.widthIn / 2;
-    const dz0 = onVertical ? dr.center.z - dr.widthIn / 2 : dr.center.z - 24;
-    const dz1 = onVertical ? dr.center.z + dr.widthIn / 2 : dr.center.z + 24;
+    const dx0 = onVertical ? dr.center.x - 12 : dr.center.x - dr.widthIn / 2;
+    const dx1 = onVertical ? dr.center.x + 12 : dr.center.x + dr.widthIn / 2;
+    const dz0 = onVertical ? dr.center.z - dr.widthIn / 2 : dr.center.z - 12;
+    const dz1 = onVertical ? dr.center.z + dr.widthIn / 2 : dr.center.z + 12;
     return x0 < dx1 && x1 > dx0 && z0 < dz1 && z1 > dz0;
   });
   const problems = [];
