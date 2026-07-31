@@ -2,23 +2,23 @@
   "spaces": [
     {
       "id": "space-0",
-      "name": "Living Room",
+      "name": "Living",
       "polygon": [
         {
-          "x": 0,
+          "x": 173,
           "z": 0
         },
         {
-          "x": 192,
+          "x": 346,
           "z": 0
         },
         {
-          "x": 192,
-          "z": 216
+          "x": 346,
+          "z": 198
         },
         {
-          "x": 0,
-          "z": 216
+          "x": 173,
+          "z": 198
         }
       ]
     },
@@ -27,130 +27,226 @@
       "name": "Kitchen",
       "polygon": [
         {
-          "x": 192,
-          "z": 0
+          "x": 139,
+          "z": 198
         },
         {
-          "x": 312,
-          "z": 0
+          "x": 346,
+          "z": 198
         },
         {
-          "x": 312,
-          "z": 216
+          "x": 346,
+          "z": 300
         },
         {
-          "x": 192,
-          "z": 216
+          "x": 139,
+          "z": 300
         }
       ]
     },
     {
       "id": "space-2",
-      "name": "Bathroom",
+      "name": "Hall",
       "polygon": [
         {
           "x": 0,
-          "z": 216
+          "z": 198
         },
         {
-          "x": 108,
-          "z": 216
+          "x": 139,
+          "z": 198
         },
         {
-          "x": 108,
+          "x": 139,
           "z": 300
+        },
+        {
+          "x": 130,
+          "z": 300
+        },
+        {
+          "x": 130,
+          "z": 435
         },
         {
           "x": 0,
-          "z": 300
+          "z": 435
         }
       ]
     },
     {
       "id": "space-3",
-      "name": "Hallway",
+      "name": "Mech",
       "polygon": [
         {
-          "x": 108,
-          "z": 216
-        },
-        {
-          "x": 312,
-          "z": 216
-        },
-        {
-          "x": 312,
+          "x": 130,
           "z": 300
         },
         {
-          "x": 108,
+          "x": 178,
           "z": 300
+        },
+        {
+          "x": 178,
+          "z": 348
+        },
+        {
+          "x": 130,
+          "z": 348
         }
       ]
     },
     {
       "id": "space-4",
-      "name": "Closet",
+      "name": "W/D",
       "polygon": [
         {
-          "x": 0,
-          "z": 300
+          "x": 130,
+          "z": 348
         },
         {
-          "x": 108,
-          "z": 300
+          "x": 178,
+          "z": 348
         },
         {
-          "x": 108,
-          "z": 504
+          "x": 178,
+          "z": 420
         },
         {
-          "x": 0,
-          "z": 504
+          "x": 130,
+          "z": 420
         }
       ]
     },
     {
       "id": "space-5",
-      "name": "Bedroom 1",
+      "name": "Closet",
       "polygon": [
         {
-          "x": 108,
+          "x": 178,
           "z": 300
         },
         {
-          "x": 216,
+          "x": 214,
           "z": 300
         },
         {
-          "x": 216,
-          "z": 504
+          "x": 214,
+          "z": 420
         },
         {
-          "x": 108,
-          "z": 504
+          "x": 178,
+          "z": 420
         }
       ]
     },
     {
       "id": "space-6",
+      "name": "Bedroom 1",
+      "polygon": [
+        {
+          "x": 214,
+          "z": 300
+        },
+        {
+          "x": 346,
+          "z": 300
+        },
+        {
+          "x": 346,
+          "z": 435
+        },
+        {
+          "x": 214,
+          "z": 435
+        }
+      ]
+    },
+    {
+      "id": "space-7",
       "name": "Bedroom 2",
       "polygon": [
         {
-          "x": 216,
-          "z": 300
+          "x": 214,
+          "z": 450
         },
         {
-          "x": 312,
-          "z": 300
+          "x": 346,
+          "z": 450
         },
         {
-          "x": 312,
-          "z": 504
+          "x": 346,
+          "z": 585
         },
         {
-          "x": 216,
-          "z": 504
+          "x": 214,
+          "z": 585
+        }
+      ]
+    },
+    {
+      "id": "space-8",
+      "name": "Bath",
+      "polygon": [
+        {
+          "x": 0,
+          "z": 435
+        },
+        {
+          "x": 96,
+          "z": 435
+        },
+        {
+          "x": 96,
+          "z": 510
+        },
+        {
+          "x": 0,
+          "z": 510
+        }
+      ]
+    },
+    {
+      "id": "space-9",
+      "name": "Bath 2",
+      "polygon": [
+        {
+          "x": 0,
+          "z": 510
+        },
+        {
+          "x": 96,
+          "z": 510
+        },
+        {
+          "x": 96,
+          "z": 585
+        },
+        {
+          "x": 0,
+          "z": 585
+        }
+      ]
+    },
+    {
+      "id": "space-10",
+      "name": "Closet 2",
+      "polygon": [
+        {
+          "x": 96,
+          "z": 435
+        },
+        {
+          "x": 214,
+          "z": 435
+        },
+        {
+          "x": 214,
+          "z": 585
+        },
+        {
+          "x": 96,
+          "z": 585
         }
       ]
     }
@@ -158,137 +254,185 @@
   "doors": [
     {
       "center": {
-        "x": 192,
-        "z": 108
+        "x": 260,
+        "z": 198
       },
-      "widthIn": 84
+      "widthIn": 120
     },
     {
       "center": {
-        "x": 150,
-        "z": 216
+        "x": 139,
+        "z": 240
       },
-      "widthIn": 48
+      "widthIn": 40
     },
     {
       "center": {
-        "x": 252,
-        "z": 216
+        "x": 130,
+        "z": 324
       },
-      "widthIn": 36
+      "widthIn": 72
     },
     {
       "center": {
-        "x": 108,
-        "z": 258
+        "x": 130,
+        "z": 384
       },
-      "widthIn": 30
+      "widthIn": 72
     },
     {
       "center": {
-        "x": 54,
+        "x": 196,
         "z": 300
       },
       "widthIn": 30
     },
     {
       "center": {
-        "x": 156,
+        "x": 280,
         "z": 300
       },
       "widthIn": 34
     },
     {
       "center": {
-        "x": 264,
-        "z": 300
+        "x": 280,
+        "z": 450
       },
       "widthIn": 34
+    },
+    {
+      "center": {
+        "x": 40,
+        "z": 435
+      },
+      "widthIn": 30
+    },
+    {
+      "center": {
+        "x": 96,
+        "z": 492
+      },
+      "widthIn": 30
+    },
+    {
+      "center": {
+        "x": 48,
+        "z": 510
+      },
+      "widthIn": 30
+    },
+    {
+      "center": {
+        "x": 214,
+        "z": 540
+      },
+      "widthIn": 32
     }
   ],
   "windows": [
     {
       "center": {
-        "x": 96,
+        "x": 346,
+        "z": 60
+      },
+      "widthIn": 60
+    },
+    {
+      "center": {
+        "x": 346,
+        "z": 140
+      },
+      "widthIn": 60
+    },
+    {
+      "center": {
+        "x": 260,
         "z": 0
       },
       "widthIn": 72
     },
     {
       "center": {
-        "x": 252,
-        "z": 0
+        "x": 346,
+        "z": 350
       },
       "widthIn": 48
     },
     {
       "center": {
-        "x": 312,
-        "z": 120
+        "x": 346,
+        "z": 520
       },
       "widthIn": 48
-    },
-    {
-      "center": {
-        "x": 156,
-        "z": 504
-      },
-      "widthIn": 60
-    },
-    {
-      "center": {
-        "x": 264,
-        "z": 504
-      },
-      "widthIn": 60
     }
   ],
   "fixtures": [
     {
       "type": "fridge",
       "center": {
-        "x": 213,
-        "z": 18
+        "x": 186,
+        "z": 216
       },
       "widthIn": 36,
       "depthIn": 30,
       "facing": "down"
     },
     {
-      "type": "kitchen_counter",
-      "center": {
-        "x": 261,
-        "z": 16
-      },
-      "widthIn": 60,
-      "depthIn": 25,
-      "facing": "down"
-    },
-    {
       "type": "stove",
       "center": {
-        "x": 294,
-        "z": 16
+        "x": 222,
+        "z": 214
       },
       "widthIn": 30,
       "depthIn": 26,
       "facing": "down"
     },
     {
+      "type": "kitchen_counter",
+      "center": {
+        "x": 282,
+        "z": 214
+      },
+      "widthIn": 60,
+      "depthIn": 25,
+      "facing": "down"
+    },
+    {
       "type": "kitchen_island",
       "center": {
-        "x": 262,
-        "z": 140
+        "x": 268,
+        "z": 156
       },
       "widthIn": 72,
       "depthIn": 36,
       "facing": "down"
     },
     {
+      "type": "washer_dryer",
+      "center": {
+        "x": 158,
+        "z": 403
+      },
+      "widthIn": 27,
+      "depthIn": 30,
+      "facing": "down"
+    },
+    {
+      "type": "sink_vanity",
+      "center": {
+        "x": 74,
+        "z": 449
+      },
+      "widthIn": 36,
+      "depthIn": 21,
+      "facing": "down"
+    },
+    {
       "type": "toilet",
       "center": {
         "x": 17,
-        "z": 246
+        "z": 468
       },
       "widthIn": 16,
       "depthIn": 28,
@@ -298,31 +442,31 @@
       "type": "shower",
       "center": {
         "x": 21,
-        "z": 276
+        "z": 552
       },
       "widthIn": 36,
       "depthIn": 36,
       "facing": "right"
     },
     {
+      "type": "toilet",
+      "center": {
+        "x": 17,
+        "z": 570
+      },
+      "widthIn": 16,
+      "depthIn": 28,
+      "facing": "right"
+    },
+    {
       "type": "sink_vanity",
       "center": {
-        "x": 76,
-        "z": 230
+        "x": 74,
+        "z": 571
       },
       "widthIn": 36,
       "depthIn": 21,
-      "facing": "down"
-    },
-    {
-      "type": "washer_dryer",
-      "center": {
-        "x": 18,
-        "z": 340
-      },
-      "widthIn": 27,
-      "depthIn": 30,
-      "facing": "right"
+      "facing": "up"
     }
   ]
 }

@@ -27,7 +27,9 @@ for (const f of d.fixtures) {
   // The corridor is the door's width along the wall, extended 24in either side of the wall line.
   const x0 = f.center.x - w / 2, x1 = f.center.x + w / 2;
   const z0 = f.center.z - dp / 2, z1 = f.center.z + dp / 2;
-  const blocked = d.doors.filter((dr) => {
+  // Openings >= 72in dissolve their wall entirely (open plan), so nothing "blocks" them — the
+  // rooms merge. Only real doorways need walk-through clearance.
+  const blocked = d.doors.filter((dr) => dr.widthIn < 72).filter((dr) => {
     // Infer wall axis: the door lies on a room boundary, so one coord is on a shared wall line.
     const onVertical = d.spaces.some((s) => s.polygon.some((p) => Math.abs(p.x - dr.center.x) < 1));
     const dx0 = onVertical ? dr.center.x - 24 : dr.center.x - dr.widthIn / 2;
@@ -39,7 +41,10 @@ for (const f of d.fixtures) {
   const problems = [];
   if (!room) problems.push('NOT IN ANY ROOM');
   else if (outside.length) problems.push(`${outside.length}/4 corners outside ${room.name}`);
-  if (blocked.length) problems.push(`blocks ${blocked.length} doorway(s)`);
+  if (blocked.length)
+    problems.push(
+      `blocks doorway(s) at ${blocked.map((b) => `(${b.center.x},${b.center.z})w${b.widthIn}`).join(' ')}`,
+    );
   if (problems.length) { bad++; console.log(`  BAD  ${f.type.padEnd(16)} @(${f.center.x},${f.center.z}) — ${problems.join('; ')}`); }
   else console.log(`  ok   ${f.type.padEnd(16)} in ${room.name}`);
 }
