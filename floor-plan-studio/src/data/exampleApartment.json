@@ -128,11 +128,11 @@
       "polygon": [
         {
           "x": 168,
-          "z": 372
+          "z": 348
         },
         {
           "x": 312,
-          "z": 372
+          "z": 348
         },
         {
           "x": 312,
@@ -146,23 +146,45 @@
     },
     {
       "id": "space-8",
-      "name": "Closet",
+      "name": "Closet 2",
       "polygon": [
         {
           "x": 168,
           "z": 300
         },
         {
+          "x": 246,
+          "z": 300
+        },
+        {
+          "x": 246,
+          "z": 348
+        },
+        {
+          "x": 168,
+          "z": 348
+        }
+      ]
+    },
+    {
+      "id": "space-9",
+      "name": "Closet 1",
+      "polygon": [
+        {
+          "x": 246,
+          "z": 300
+        },
+        {
           "x": 312,
           "z": 300
         },
         {
           "x": 312,
-          "z": 372
+          "z": 348
         },
         {
-          "x": 168,
-          "z": 372
+          "x": 246,
+          "z": 348
         }
       ]
     },
@@ -242,9 +264,16 @@
     {
       "center": {
         "x": 168,
-        "z": 336
+        "z": 324
       },
-      "widthIn": 48
+      "widthIn": 40
+    },
+    {
+      "center": {
+        "x": 273,
+        "z": 300
+      },
+      "widthIn": 40
     },
     {
       "center": {
@@ -252,6 +281,13 @@
         "z": 267
       },
       "widthIn": 30
+    },
+    {
+      "center": {
+        "x": 0,
+        "z": 132
+      },
+      "widthIn": 36
     }
   ],
   "windows": [
@@ -302,38 +338,38 @@
     {
       "type": "fridge",
       "center": {
-        "x": 24,
-        "z": 210
+        "x": 18,
+        "z": 216
       },
       "widthIn": 33,
       "depthIn": 30,
-      "facing": "down"
+      "facing": "right"
     },
     {
       "type": "stove",
       "center": {
-        "x": 64,
-        "z": 208
+        "x": 16,
+        "z": 258
       },
       "widthIn": 30,
       "depthIn": 26,
-      "facing": "down"
+      "facing": "right"
     },
     {
       "type": "kitchen_counter",
       "center": {
-        "x": 124,
-        "z": 208
+        "x": 160,
+        "z": 285
       },
       "widthIn": 60,
       "depthIn": 25,
-      "facing": "down"
+      "facing": "up"
     },
     {
       "type": "kitchen_island",
       "center": {
-        "x": 96,
-        "z": 262
+        "x": 108,
+        "z": 252
       },
       "widthIn": 66,
       "depthIn": 32,
@@ -342,12 +378,12 @@
     {
       "type": "sink_vanity",
       "center": {
-        "x": 348,
-        "z": 328
+        "x": 325,
+        "z": 356
       },
       "widthIn": 40,
       "depthIn": 21,
-      "facing": "down"
+      "facing": "right"
     },
     {
       "type": "toilet",
@@ -362,8 +398,8 @@
     {
       "type": "shower",
       "center": {
-        "x": 348,
-        "z": 440
+        "x": 352,
+        "z": 446
       },
       "widthIn": 38,
       "depthIn": 38,
@@ -373,7 +409,7 @@
       "type": "sink_vanity",
       "center": {
         "x": 252,
-        "z": 386
+        "z": 362
       },
       "widthIn": 40,
       "depthIn": 21,

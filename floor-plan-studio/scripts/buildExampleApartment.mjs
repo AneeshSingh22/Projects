@@ -48,7 +48,8 @@ const Z_NOTCH = 96;  // where the building steps in on the right (the L)
 const Z_A = 192;  // bottom of the living/dining room
 const Z_B = 300;  // bottom of kitchen / entry hall / bedroom 1
 const Z_LAUN2 = 234; // top of the laundry closet (a reach-in off the kitchen)
-const Z_WIC = 372; // walk-in closet / bathroom-2 divider
+const Z_WIC = 348; // bedroom-2 closet / bathroom-2 divider
+const X_WIC = 246; // right edge of bedroom-2's closet
 const Z_C = 468;  // bottom exterior
 
 const rect = (x0, z0, x1, z1) => [
@@ -80,8 +81,9 @@ const spaces = [
 
   // Bedroom 2 across the bottom-left with its own en-suite between it and bath 1.
   { id: 'space-5', name: 'Bedroom 2',  polygon: rect(X0, Z_B, X_BR2, Z_C) },
-  { id: 'space-6', name: 'Bathroom 2', polygon: rect(X_BR2, Z_WIC, X_C, Z_C) },
-  { id: 'space-8', name: 'Closet',     polygon: rect(X_BR2, Z_B,   X_C, Z_WIC) },
+  { id: 'space-6', name: 'Bathroom 2', polygon: rect(X_BR2, Z_WIC, X_C,   Z_C)   },
+  { id: 'space-8', name: 'Closet 2',   polygon: rect(X_BR2, Z_B,   X_WIC, Z_WIC) },
+  { id: 'space-9', name: 'Closet 1',   polygon: rect(X_WIC, Z_B,   X_C,   Z_WIC) },
   { id: 'space-7', name: 'Laundry',    polygon: rect(X_B, Z_LAUN2, X_LAUNR, Z_B) },
 ];
 
@@ -97,8 +99,13 @@ const doors = [
   { center: { x: 348, z: Z_B }, widthIn: 30 },  // Bedroom 1 -> its en-suite (Bathroom 1)
   { center: { x: 96,  z: Z_B }, widthIn: 34 },  // Kitchen <-> Bedroom 2
   { center: { x: X_BR2, z: 420 },    widthIn: 30 },  // Bedroom 2 -> its en-suite (Bathroom 2)
-  { center: { x: X_BR2, z: 336 },    widthIn: 48 },  // Bedroom 2 -> walk-in closet (bifold)
+  { center: { x: X_BR2, z: 324 },    widthIn: 40 },  // Bedroom 2 -> its closet (bifold)
+  { center: { x: 273,   z: Z_B },   widthIn: 40 },  // Bedroom 1 -> its closet (bifold)
   { center: { x: X_B, z: 267 },      widthIn: 30 },  // Kitchen -> Laundry closet
+
+  // The apartment's front door, on the left exterior wall of the living room. Exterior walls are
+  // never dissolved by open-plan logic, so this renders as a real doorway you can walk through.
+  { center: { x: X0,  z: 132 },      widthIn: 36 },  // FRONT DOOR
 ];
 
 // Windows on exterior walls only. Every habitable room gets daylight; the baths are interior.
@@ -116,16 +123,17 @@ const windows = [
  * of wall thickness off that wall line. Sideways-facing items swap width/depth.
  */
 const fixtures = [
-  // Kitchen: a galley run down the left wall plus an island facing the living room.
-  { type: 'fridge',          center: { x: 24,  z: 210 }, widthIn: 33, depthIn: 30, facing: 'down' },
-  { type: 'stove',           center: { x: 64,  z: 208 }, widthIn: 30, depthIn: 26, facing: 'down' },
-  { type: 'kitchen_counter', center: { x: 124, z: 208 }, widthIn: 60, depthIn: 25, facing: 'down' },
-  { type: 'kitchen_island',  center: { x: 96,  z: 262 }, widthIn: 66, depthIn: 32, facing: 'down' },
+  // Kitchen: the run sits on the left EXTERIOR wall. The kitchen/living boundary is fully
+  // dissolved by the open-plan openings, so backing cabinets onto it would leave them floating.
+  { type: 'fridge',          center: { x: 18,  z: 216 }, widthIn: 33, depthIn: 30, facing: 'right' },
+  { type: 'stove',           center: { x: 16,  z: 258 }, widthIn: 30, depthIn: 26, facing: 'right' },
+  { type: 'kitchen_counter', center: { x: 160, z: 285 }, widthIn: 60, depthIn: 25, facing: 'up' },
+  { type: 'kitchen_island',  center: { x: 108, z: 252 }, widthIn: 66, depthIn: 32, facing: 'down' },
 
   // Bathroom 1 (en-suite to Bedroom 1): vanity, toilet, shower.
-  { type: 'sink_vanity', center: { x: 348, z: 328 },  widthIn: 40, depthIn: 21, facing: 'down' },
+  { type: 'sink_vanity', center: { x: 325, z: 356 },  widthIn: 40, depthIn: 21, facing: 'right' },
   { type: 'toilet',      center: { x: 366, z: 388 },  widthIn: 18, depthIn: 26, facing: 'left' },
-  { type: 'shower',      center: { x: 348, z: 440 },  widthIn: 38, depthIn: 38, facing: 'up' },
+  { type: 'shower',      center: { x: 352, z: 446 },  widthIn: 38, depthIn: 38, facing: 'up' },
 
   // Bathroom 2 (en-suite to Bedroom 2): vanity, toilet, shower.
   { type: 'sink_vanity', center: { x: 252, z: Z_WIC + 14 }, widthIn: 40, depthIn: 21, facing: 'down' },
