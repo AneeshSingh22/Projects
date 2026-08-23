@@ -29,9 +29,10 @@ export function DashboardPage() {
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold">Your Rooms</h1>
-            <p className="mt-1 text-neutral-400">
-              Model your real rooms and try out furniture layouts before you buy or rearrange anything.
+            <h1 className="text-3xl font-semibold tracking-tight text-neutral-50">Your spaces</h1>
+            <p className="mt-1.5 text-neutral-400">
+              Model a real apartment, try furniture layouts, and walk through it in 3D before you
+              buy or rearrange anything.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -48,7 +49,7 @@ export function DashboardPage() {
             </button>
             <Link
               to="/rooms/new"
-              className="rounded-lg bg-indigo-500 px-4 py-2.5 font-medium text-white shadow-sm hover:bg-indigo-400"
+              className="rounded-lg bg-gradient-to-b from-indigo-400 to-indigo-600 px-4 py-2.5 font-medium text-white shadow-sm shadow-indigo-500/25 transition hover:from-indigo-300 hover:to-indigo-500"
             >
               + New Room
             </Link>
@@ -56,7 +57,7 @@ export function DashboardPage() {
         </div>
 
         {/* Set expectations before anyone hits a paywall-ish error mid-flow. */}
-        <div className="mb-8 rounded-xl border border-neutral-800 bg-neutral-900/40 p-4 text-sm text-neutral-400">
+        <div className="mb-8 rounded-xl border border-neutral-800 bg-gradient-to-b from-neutral-900/70 to-neutral-900/30 p-4 text-sm text-neutral-400">
           <p>
             <span className="font-medium text-neutral-200">Everything here is free to use.</span>{' '}
             Explore the example apartment, trace your own floor plan by hand, place furniture, and

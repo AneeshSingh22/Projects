@@ -109,34 +109,80 @@ export function NewRoomPage() {
   if (!flow) {
     return (
       <AppShell>
-        <div className="mx-auto max-w-2xl">
-          <h1 className="mb-2 text-2xl font-semibold text-neutral-100">New Room</h1>
-          <p className="mb-8 text-neutral-400">How would you like to set this space up?</p>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={() => setFlow('quick')}
-              className="rounded-xl border border-neutral-800 bg-neutral-900/50 p-6 text-left transition hover:border-indigo-500"
-            >
-              <div className="mb-2 text-2xl">📐</div>
-              <h3 className="mb-1 font-medium text-neutral-100">Quick rectangular room</h3>
-              <p className="text-sm text-neutral-400">
-                Just type width, length, and ceiling height. Fastest way to get started with one room.
-              </p>
-            </button>
-            <button
-              type="button"
-              onClick={() => setFlow('trace')}
-              className="rounded-xl border border-neutral-800 bg-neutral-900/50 p-6 text-left transition hover:border-indigo-500"
-            >
-              <div className="mb-2 text-2xl">🗺️</div>
-              <h3 className="mb-1 font-medium text-neutral-100">Trace from floor plan</h3>
-              <p className="text-sm text-neutral-400">
-                Upload a floor plan image and trace each room's outline on top of it, using the printed
-                dimensions. Builds a connected, walkable, multi-room apartment.
-              </p>
-            </button>
-          </div>
+        <div className="mx-auto max-w-3xl">
+          <h1 className="mb-2 text-3xl font-semibold tracking-tight text-neutral-50">Create a space</h1>
+          <p className="mb-10 text-neutral-400">
+            Start from a floor plan image, or skip straight to a single room.
+          </p>
+
+          {/* --- Option 1: from a floor plan, with the three detection methods spelled out --- */}
+          <button
+            type="button"
+            onClick={() => setFlow('trace')}
+            className="group w-full rounded-2xl border border-neutral-800 bg-gradient-to-b from-neutral-900 to-neutral-900/40 p-6 text-left shadow-lg shadow-black/20 transition hover:border-indigo-500/70 hover:shadow-indigo-500/5"
+          >
+            <div className="flex items-start gap-4">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-xl ring-1 ring-inset ring-indigo-500/20">
+                🗺️
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-medium text-neutral-100">I have a floor plan image</h3>
+                  <span className="rounded-full bg-indigo-500/15 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-indigo-300">
+                    Recommended
+                  </span>
+                </div>
+                <p className="mt-1 text-sm text-neutral-400">
+                  Upload it, then pick how to turn it into a walkable multi-room apartment. You'll
+                  choose one of three methods on the next screen:
+                </p>
+
+                <div className="mt-4 space-y-2">
+                  <MethodRow
+                    icon="✏️"
+                    title="Trace it yourself"
+                    tag="Free"
+                    tagClass="bg-emerald-500/15 text-emerald-300"
+                    body="Most accurate — you click each room's corners and type the printed dimensions. Takes a few minutes, and it captures rooms, walls and doors only, not furniture like kitchen counters or bathroom fixtures."
+                  />
+                  <MethodRow
+                    icon="✨"
+                    title="Analyze with AI"
+                    tag="API key"
+                    tagClass="bg-indigo-500/15 text-indigo-300"
+                    body="Fast and thorough — reads room shapes, dimensions, doors, windows and built-in fixtures (kitchen counters, appliances, toilets, showers). Not 100% accurate and can make mistakes, but anything wrong is fixable by hand afterwards. Needs your own Anthropic key, ~25¢ per plan."
+                  />
+                  <MethodRow
+                    icon="🧪"
+                    title="Computer vision scan"
+                    tag="Experimental"
+                    tagClass="bg-amber-500/15 text-amber-300"
+                    body="Runs entirely offline in your browser, no key and no cost. Detects room outlines only — no furniture or fixtures — and on a real 2-bedroom plan it found 4 of 10 rooms with rough, jagged edges. Included to show honestly why the AI step earns its cost. Treat it as a rough starting outline to clean up by hand."
+                  />
+                </div>
+              </div>
+            </div>
+          </button>
+
+          {/* --- Option 2: no floor plan --- */}
+          <button
+            type="button"
+            onClick={() => setFlow('quick')}
+            className="group mt-4 w-full rounded-2xl border border-neutral-800 bg-neutral-900/40 p-6 text-left transition hover:border-neutral-600"
+          >
+            <div className="flex items-start gap-4">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-neutral-800/70 text-xl ring-1 ring-inset ring-neutral-700">
+                📐
+              </div>
+              <div>
+                <h3 className="font-medium text-neutral-100">I don't have a floor plan</h3>
+                <p className="mt-1 text-sm text-neutral-400">
+                  Type a width, length and ceiling height to get one rectangular room. The quickest
+                  way to start experimenting with furniture.
+                </p>
+              </div>
+            </div>
+          </button>
         </div>
       </AppShell>
     );
@@ -275,5 +321,33 @@ export function NewRoomPage() {
         )}
       </div>
     </AppShell>
+  );
+}
+
+/** One detection method in the "I have a floor plan" card, with its honest trade-off. */
+function MethodRow({
+  icon,
+  title,
+  tag,
+  tagClass,
+  body,
+}: {
+  icon: string;
+  title: string;
+  tag: string;
+  tagClass: string;
+  body: string;
+}) {
+  return (
+    <div className="rounded-xl border border-neutral-800/80 bg-neutral-950/40 p-3">
+      <div className="flex items-center gap-2">
+        <span className="text-sm">{icon}</span>
+        <span className="text-sm font-medium text-neutral-200">{title}</span>
+        <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${tagClass}`}>
+          {tag}
+        </span>
+      </div>
+      <p className="mt-1.5 text-xs leading-relaxed text-neutral-500">{body}</p>
+    </div>
   );
 }
