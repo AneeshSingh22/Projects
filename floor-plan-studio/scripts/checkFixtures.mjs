@@ -50,3 +50,28 @@ for (const f of d.fixtures) {
 }
 console.log(bad ? `\n${bad} FIXTURE PROBLEM(S)` : '\nAll fixtures placed cleanly.');
 process.exitCode = bad ? 1 : 0;
+
+// --- Openings must not overlap each other -------------------------------------------------
+// A door placed inside a window's span renders as a doorway cut through glass. Both live on the
+// same wall line, so compare every pair that shares one.
+const openings = [
+  ...d.doors.map((o) => ({ ...o, kind: 'door' })),
+  ...d.windows.map((o) => ({ ...o, kind: 'window' })),
+];
+let clashes = 0;
+for (let i = 0; i < openings.length; i++) {
+  for (let j = i + 1; j < openings.length; j++) {
+    const a = openings[i], b = openings[j];
+    const sameX = Math.abs(a.center.x - b.center.x) < 1;
+    const sameZ = Math.abs(a.center.z - b.center.z) < 1;
+    if (!sameX && !sameZ) continue;
+    const [pa, pb] = sameX ? [a.center.z, b.center.z] : [a.center.x, b.center.x];
+    const overlap = (a.widthIn + b.widthIn) / 2 - Math.abs(pa - pb);
+    if (overlap > 0) {
+      clashes++;
+      console.log(`  BAD  ${a.kind} at (${a.center.x},${a.center.z}) overlaps ${b.kind} at (${b.center.x},${b.center.z}) by ${overlap.toFixed(0)}in`);
+    }
+  }
+}
+if (clashes) { console.log(`\n${clashes} OVERLAPPING OPENING(S)`); process.exitCode = 1; }
+else console.log('No overlapping doors/windows.');
