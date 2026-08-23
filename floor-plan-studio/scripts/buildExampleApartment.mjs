@@ -37,7 +37,7 @@ const X0 = 0;     // left exterior
 const X_A = 150;  // kitchen / entry-hall divider
 const X_B = 234;  // entry hall / bedroom-1 divider
 const X_BR2 = 168;   // bedroom-2 / its en-suite divider
-const X_LAUNR = 300; // right edge of the laundry closet
+const X_LAUNR = 288; // right edge of the laundry closet
 const X_LAUN = 264; // bathroom-2 / laundry divider
 const X_C = 312;   // laundry / bathroom-1 divider
 const X_D = 384;  // right exterior (32 ft)
@@ -47,7 +47,7 @@ const Z0 = 0;     // top exterior
 const Z_NOTCH = 96;  // where the building steps in on the right (the L)
 const Z_A = 192;  // bottom of the living/dining room
 const Z_B = 300;  // bottom of kitchen / entry hall / bedroom 1
-const Z_LAUN2 = 234; // top of the laundry closet (off the entry hall)
+const Z_LAUN2 = 234; // top of the laundry closet (a reach-in off the kitchen)
 const Z_WIC = 372; // walk-in closet / bathroom-2 divider
 const Z_C = 468;  // bottom exterior
 
@@ -66,10 +66,7 @@ const spaces = [
   },
 
   // Kitchen tucks under the living room on the left, open to it.
-  { id: 'space-1', name: 'Kitchen', polygon: rect(X0, Z_A, X_A, Z_B) },
-
-  // Short entry hall linking living, both bedrooms and the laundry.
-  { id: 'space-2', name: 'Entry Hall', polygon: rect(X_A, Z_A, X_B, Z_B) },
+  { id: 'space-1', name: 'Kitchen', polygon: rect(X0, Z_A, X_B, Z_B) },
 
   // Bedroom 1 with its own en-suite directly below it.
   {
@@ -94,14 +91,14 @@ const spaces = [
  */
 const doors = [
   { center: { x: 72,  z: Z_A }, widthIn: 96 },  // Living <-> Kitchen (open plan)
-  { center: { x: X_A, z: 258 }, widthIn: 40 },  // Kitchen <-> Entry Hall
-  { center: { x: 186, z: Z_A }, widthIn: 60 },  // Living <-> Entry Hall (cased opening)
-  { center: { x: X_B, z: 240 }, widthIn: 34 },  // Entry Hall <-> Bedroom 1
+  { center: { x: 186, z: Z_A }, widthIn: 72 },  // Living <-> Kitchen (second open span)
+  { center: { x: X_B, z: 150 }, widthIn: 34 },  // Living Room <-> Bedroom 1
+  { center: { x: X_B, z: 264 }, widthIn: 32 },  // Kitchen <-> Bedroom 1
   { center: { x: 348, z: Z_B }, widthIn: 30 },  // Bedroom 1 -> its en-suite (Bathroom 1)
-  { center: { x: 96,  z: Z_B }, widthIn: 34 },  // Entry Hall/Kitchen side <-> Bedroom 2
+  { center: { x: 96,  z: Z_B }, widthIn: 34 },  // Kitchen <-> Bedroom 2
   { center: { x: X_BR2, z: 420 },    widthIn: 30 },  // Bedroom 2 -> its en-suite (Bathroom 2)
   { center: { x: X_BR2, z: 336 },    widthIn: 48 },  // Bedroom 2 -> walk-in closet (bifold)
-  { center: { x: X_B, z: 267 },      widthIn: 30 },  // Entry Hall -> Laundry
+  { center: { x: X_B, z: 267 },      widthIn: 30 },  // Kitchen -> Laundry closet
 ];
 
 // Windows on exterior walls only. Every habitable room gets daylight; the baths are interior.
@@ -120,10 +117,10 @@ const windows = [
  */
 const fixtures = [
   // Kitchen: a galley run down the left wall plus an island facing the living room.
-  { type: 'fridge',          center: { x: 21,  z: 210 }, widthIn: 33, depthIn: 30, facing: 'down' },
-  { type: 'stove',           center: { x: 60,  z: 208 }, widthIn: 30, depthIn: 26, facing: 'down' },
-  { type: 'kitchen_counter', center: { x: 114, z: 208 }, widthIn: 60, depthIn: 25, facing: 'down' },
-  { type: 'kitchen_island',  center: { x: 42,  z: 264 }, widthIn: 56, depthIn: 32, facing: 'down' },
+  { type: 'fridge',          center: { x: 24,  z: 210 }, widthIn: 33, depthIn: 30, facing: 'down' },
+  { type: 'stove',           center: { x: 64,  z: 208 }, widthIn: 30, depthIn: 26, facing: 'down' },
+  { type: 'kitchen_counter', center: { x: 124, z: 208 }, widthIn: 60, depthIn: 25, facing: 'down' },
+  { type: 'kitchen_island',  center: { x: 96,  z: 262 }, widthIn: 66, depthIn: 32, facing: 'down' },
 
   // Bathroom 1 (en-suite to Bedroom 1): vanity, toilet, shower.
   { type: 'sink_vanity', center: { x: 348, z: 328 },  widthIn: 40, depthIn: 21, facing: 'down' },
@@ -135,7 +132,7 @@ const fixtures = [
   { type: 'toilet',      center: { x: 297, z: 414 },       widthIn: 18, depthIn: 28, facing: 'left' },
   { type: 'shower',      center: { x: 291, z: Z_C - 26 },    widthIn: 38, depthIn: 38, facing: 'up' },
 
-  // Laundry: stacked washer/dryer in the entry hall's utility nook.
+  // Laundry: stacked washer/dryer in its reach-in closet off the kitchen.
   { type: 'washer_dryer', center: { x: 270, z: 267 }, widthIn: 30, depthIn: 32, facing: 'right' },
 ];
 
