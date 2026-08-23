@@ -450,9 +450,9 @@ export function FloorPlanTracer({
       <div className="w-72 shrink-0 space-y-4">
         {mode === 'choose' && (
           <div className="rounded-lg border border-neutral-800 bg-neutral-900/50 p-4">
-            <h4 className="mb-1 text-sm font-medium text-neutral-100">Detect rooms</h4>
+            <h4 className="mb-1 text-sm font-medium text-neutral-100">How should we read this plan?</h4>
             <p className="mb-3 text-xs text-neutral-500">
-              Choose how to turn this image into a room layout.
+              Whichever you pick, you can fix anything by hand afterwards.
             </p>
             {aiError && (
               <div className="mb-3 rounded-lg border border-red-900/50 bg-red-950/40 p-2.5 text-xs text-red-300">
@@ -465,10 +465,16 @@ export function FloorPlanTracer({
                 onClick={() => imageRef.current && runAiDetect(imageRef.current, imageFile)}
                 className="w-full rounded-lg bg-indigo-500 px-3 py-2.5 text-left text-sm font-medium text-white"
               >
-                <span className="block">✨ Analyze with AI (recommended)</span>
+                <span className="flex items-center gap-1.5">
+                  ✨ Analyze with AI
+                  <span className="rounded-full bg-white/20 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide text-white">
+                    Recommended
+                  </span>
+                </span>
                 <span className="mt-0.5 block text-xs font-normal text-indigo-100/80">
-                  Claude reads the plan like an architect — room shapes, dimensions, doors, windows
-                  and fixtures. {keyPresent ? 'Costs ~25¢, billed to you by Anthropic.' : 'Needs your own API key.'}
+                  Reads room shapes, dimensions, doors, windows and built-in fixtures — kitchen
+                  counters, appliances, toilets, showers. Not 100% accurate; mistakes are fixable by
+                  hand. {keyPresent ? 'Costs ~25¢, billed to you by Anthropic.' : 'Needs your own API key.'}
                 </span>
               </button>
               {!keyPresent && (
@@ -479,21 +485,37 @@ export function FloorPlanTracer({
               )}
               <button
                 type="button"
-                onClick={() => imageRef.current && runAutoDetect(imageRef.current)}
-                className="w-full rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-2.5 text-left text-sm text-neutral-200 hover:border-indigo-500"
+                onClick={skipToManualTrace}
+                className="w-full rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-2.5 text-left text-sm text-neutral-200 hover:border-emerald-600"
               >
-                <span className="block">Detect automatically (offline)</span>
+                <span className="flex items-center gap-1.5">
+                  ✏️ Trace it myself
+                  <span className="rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide text-emerald-300">
+                    Free
+                  </span>
+                </span>
                 <span className="mt-0.5 block text-xs font-normal text-neutral-500">
-                  Runs entirely in your browser, no API key. Less reliable on complex or open-concept
-                  layouts.
+                  Most accurate. Click each room's corners and type its printed dimensions. Takes a
+                  few minutes, and captures rooms, walls and doors only — no kitchen or bathroom
+                  fixtures.
                 </span>
               </button>
               <button
                 type="button"
-                onClick={skipToManualTrace}
-                className="w-full rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-2.5 text-left text-sm text-neutral-200 hover:border-indigo-500"
+                onClick={() => imageRef.current && runAutoDetect(imageRef.current)}
+                className="w-full rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-2.5 text-left text-sm text-neutral-200 hover:border-amber-600"
               >
-                ✏️ Trace it myself (free, no API key)
+                <span className="flex items-center gap-1.5">
+                  🧪 Computer vision scan
+                  <span className="rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide text-amber-300">
+                    Experimental
+                  </span>
+                </span>
+                <span className="mt-0.5 block text-xs font-normal text-neutral-500">
+                  Offline, no key, no cost — but it finds room outlines only, misses rooms on busy
+                  plans, and its edges come out rough. A starting outline to clean up, not a finished
+                  layout.
+                </span>
               </button>
             </div>
           </div>
