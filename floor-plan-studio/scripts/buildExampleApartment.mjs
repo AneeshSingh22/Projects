@@ -37,7 +37,8 @@ const X0 = 0;     // left exterior
 const X_A = 150;  // kitchen / entry-hall divider
 const X_B = 234;  // entry hall / bedroom-1 divider
 const X_BR2 = 168;   // bedroom-2 / its en-suite divider
-const X_LAUNR = 288; // right edge of the laundry closet
+const X_LAUNR = 300; // right edge of the laundry closet
+const X_CL1 = 300;   // left edge of bedroom 1's closet
 const X_LAUN = 264; // bathroom-2 / laundry divider
 const X_C = 312;   // laundry / bathroom-1 divider
 const X_D = 384;  // right exterior (32 ft)
@@ -70,21 +71,16 @@ const spaces = [
   { id: 'space-1', name: 'Kitchen', polygon: rect(X0, Z_A, X_B, Z_B) },
 
   // Bedroom 1 with its own en-suite directly below it.
-  {
-    id: 'space-3', name: 'Bedroom 1',
-    polygon: [
-      { x: X_B, z: Z_NOTCH }, { x: X_D, z: Z_NOTCH }, { x: X_D, z: Z_B },
-      { x: X_LAUNR, z: Z_B }, { x: X_LAUNR, z: Z_LAUN2 }, { x: X_B, z: Z_LAUN2 },
-    ],
-  },
+  { id: 'space-3', name: 'Bedroom 1', polygon: rect(X_B, Z_NOTCH, X_D, Z_LAUN2) },
   { id: 'space-4', name: 'Bathroom 1', polygon: rect(X_C, Z_B, X_D, Z_C) },
 
   // Bedroom 2 across the bottom-left with its own en-suite between it and bath 1.
   { id: 'space-5', name: 'Bedroom 2',  polygon: rect(X0, Z_B, X_BR2, Z_C) },
   { id: 'space-6', name: 'Bathroom 2', polygon: rect(X_BR2, Z_WIC, X_C,   Z_C)   },
-  { id: 'space-8', name: 'Closet 2',   polygon: rect(X_BR2, Z_B,   X_WIC, Z_WIC) },
-  { id: 'space-9', name: 'Closet 1',   polygon: rect(X_WIC, Z_B,   X_C,   Z_WIC) },
-  { id: 'space-7', name: 'Laundry',    polygon: rect(X_B, Z_LAUN2, X_LAUNR, Z_B) },
+  { id: 'space-8', name: 'Closet 2',   polygon: rect(X_BR2, Z_B, X_C, Z_WIC) },
+
+  { id: 'space-7', name: 'Laundry',    polygon: rect(X_B,     Z_LAUN2, X_LAUNR, Z_B) },
+  { id: 'space-9', name: 'Closet 1',   polygon: rect(X_CL1,  Z_LAUN2, X_D,     Z_B) },
 ];
 
 /**
@@ -95,17 +91,16 @@ const doors = [
   { center: { x: 72,  z: Z_A }, widthIn: 96 },  // Living <-> Kitchen (open plan)
   { center: { x: 186, z: Z_A }, widthIn: 72 },  // Living <-> Kitchen (second open span)
   { center: { x: X_B, z: 150 }, widthIn: 34 },  // Living Room <-> Bedroom 1
-  { center: { x: X_B, z: 264 }, widthIn: 32 },  // Kitchen <-> Bedroom 1
   { center: { x: 348, z: Z_B }, widthIn: 30 },  // Bedroom 1 -> its en-suite (Bathroom 1)
   { center: { x: 96,  z: Z_B }, widthIn: 34 },  // Kitchen <-> Bedroom 2
   { center: { x: X_BR2, z: 420 },    widthIn: 30 },  // Bedroom 2 -> its en-suite (Bathroom 2)
   { center: { x: X_BR2, z: 324 },    widthIn: 40 },  // Bedroom 2 -> its closet (bifold)
-  { center: { x: 273,   z: Z_B },   widthIn: 40 },  // Bedroom 1 -> its closet (bifold)
+  { center: { x: 342,   z: Z_LAUN2 }, widthIn: 48 },  // Bedroom 1 -> its closet (bifold)
   { center: { x: X_B, z: 267 },      widthIn: 30 },  // Kitchen -> Laundry closet
 
   // The apartment's front door, on the left exterior wall of the living room. Exterior walls are
   // never dissolved by open-plan logic, so this renders as a real doorway you can walk through.
-  { center: { x: X0,  z: 132 },      widthIn: 36 },  // FRONT DOOR
+  { center: { x: X0,  z: 162 },      widthIn: 36 },  // FRONT DOOR
 ];
 
 // Windows on exterior walls only. Every habitable room gets daylight; the baths are interior.
@@ -141,7 +136,7 @@ const fixtures = [
   { type: 'shower',      center: { x: 291, z: Z_C - 26 },    widthIn: 38, depthIn: 38, facing: 'up' },
 
   // Laundry: stacked washer/dryer in its reach-in closet off the kitchen.
-  { type: 'washer_dryer', center: { x: 270, z: 267 }, widthIn: 30, depthIn: 32, facing: 'right' },
+  { type: 'washer_dryer', center: { x: 267, z: 281 }, widthIn: 30, depthIn: 32, facing: 'up' },
 ];
 
 const out = { spaces, doors, windows, fixtures };
