@@ -5,20 +5,24 @@
       "name": "Living Room",
       "polygon": [
         {
-          "x": 240,
+          "x": 0,
           "z": 0
         },
         {
-          "x": 408,
+          "x": 234,
           "z": 0
         },
         {
-          "x": 408,
-          "z": 252
+          "x": 234,
+          "z": 96
         },
         {
-          "x": 240,
-          "z": 252
+          "x": 234,
+          "z": 192
+        },
+        {
+          "x": 0,
+          "z": 192
         }
       ]
     },
@@ -27,152 +31,182 @@
       "name": "Kitchen",
       "polygon": [
         {
-          "x": 240,
-          "z": 252
+          "x": 0,
+          "z": 192
         },
         {
-          "x": 408,
-          "z": 252
+          "x": 150,
+          "z": 192
         },
         {
-          "x": 408,
-          "z": 396
+          "x": 150,
+          "z": 300
         },
         {
-          "x": 240,
-          "z": 396
+          "x": 0,
+          "z": 300
         }
       ]
     },
     {
       "id": "space-2",
-      "name": "Bedroom 1",
+      "name": "Entry Hall",
       "polygon": [
         {
-          "x": 0,
-          "z": 0
+          "x": 150,
+          "z": 192
         },
         {
-          "x": 240,
-          "z": 0
+          "x": 234,
+          "z": 192
         },
         {
-          "x": 240,
-          "z": 144
+          "x": 234,
+          "z": 300
         },
         {
-          "x": 0,
-          "z": 144
+          "x": 150,
+          "z": 300
         }
       ]
     },
     {
       "id": "space-3",
-      "name": "Bathroom 1",
+      "name": "Bedroom 1",
       "polygon": [
         {
-          "x": 0,
-          "z": 144
+          "x": 234,
+          "z": 96
         },
         {
-          "x": 156,
-          "z": 144
+          "x": 384,
+          "z": 96
         },
         {
-          "x": 156,
-          "z": 252
+          "x": 384,
+          "z": 300
         },
         {
-          "x": 0,
-          "z": 252
+          "x": 300,
+          "z": 300
+        },
+        {
+          "x": 300,
+          "z": 234
+        },
+        {
+          "x": 234,
+          "z": 234
         }
       ]
     },
     {
       "id": "space-4",
-      "name": "Laundry",
+      "name": "Bathroom 1",
       "polygon": [
         {
-          "x": 0,
-          "z": 252
+          "x": 312,
+          "z": 300
         },
         {
-          "x": 156,
-          "z": 252
+          "x": 384,
+          "z": 300
         },
         {
-          "x": 156,
-          "z": 312
+          "x": 384,
+          "z": 468
         },
         {
-          "x": 0,
-          "z": 312
+          "x": 312,
+          "z": 468
         }
       ]
     },
     {
       "id": "space-5",
-      "name": "Bathroom 2",
+      "name": "Bedroom 2",
       "polygon": [
         {
           "x": 0,
-          "z": 312
+          "z": 300
         },
         {
-          "x": 156,
-          "z": 312
+          "x": 168,
+          "z": 300
         },
         {
-          "x": 156,
-          "z": 396
+          "x": 168,
+          "z": 468
         },
         {
           "x": 0,
-          "z": 396
+          "z": 468
         }
       ]
     },
     {
       "id": "space-6",
-      "name": "Hallway",
+      "name": "Bathroom 2",
       "polygon": [
         {
-          "x": 156,
-          "z": 144
+          "x": 168,
+          "z": 372
         },
         {
-          "x": 240,
-          "z": 144
+          "x": 312,
+          "z": 372
         },
         {
-          "x": 240,
-          "z": 396
+          "x": 312,
+          "z": 468
         },
         {
-          "x": 156,
-          "z": 396
+          "x": 168,
+          "z": 468
+        }
+      ]
+    },
+    {
+      "id": "space-8",
+      "name": "Closet",
+      "polygon": [
+        {
+          "x": 168,
+          "z": 300
+        },
+        {
+          "x": 312,
+          "z": 300
+        },
+        {
+          "x": 312,
+          "z": 372
+        },
+        {
+          "x": 168,
+          "z": 372
         }
       ]
     },
     {
       "id": "space-7",
-      "name": "Bedroom 2",
+      "name": "Laundry",
       "polygon": [
         {
-          "x": 0,
-          "z": 396
+          "x": 234,
+          "z": 234
         },
         {
-          "x": 408,
-          "z": 396
+          "x": 300,
+          "z": 234
         },
         {
-          "x": 408,
-          "z": 480
+          "x": 300,
+          "z": 300
         },
         {
-          "x": 0,
-          "z": 480
+          "x": 234,
+          "z": 300
         }
       ]
     }
@@ -180,101 +214,108 @@
   "doors": [
     {
       "center": {
-        "x": 324,
-        "z": 252
+        "x": 72,
+        "z": 192
       },
-      "widthIn": 120
+      "widthIn": 96
     },
     {
       "center": {
-        "x": 240,
-        "z": 180
-      },
-      "widthIn": 60
-    },
-    {
-      "center": {
-        "x": 240,
-        "z": 340
+        "x": 150,
+        "z": 258
       },
       "widthIn": 40
     },
     {
       "center": {
-        "x": 156,
-        "z": 186
+        "x": 186,
+        "z": 192
       },
-      "widthIn": 32
+      "widthIn": 60
     },
     {
       "center": {
-        "x": 156,
-        "z": 282
+        "x": 234,
+        "z": 240
+      },
+      "widthIn": 34
+    },
+    {
+      "center": {
+        "x": 348,
+        "z": 300
+      },
+      "widthIn": 30
+    },
+    {
+      "center": {
+        "x": 96,
+        "z": 300
+      },
+      "widthIn": 34
+    },
+    {
+      "center": {
+        "x": 168,
+        "z": 420
+      },
+      "widthIn": 30
+    },
+    {
+      "center": {
+        "x": 168,
+        "z": 336
       },
       "widthIn": 48
     },
     {
       "center": {
-        "x": 156,
-        "z": 354
+        "x": 234,
+        "z": 267
       },
-      "widthIn": 32
-    },
-    {
-      "center": {
-        "x": 198,
-        "z": 144
-      },
-      "widthIn": 34
-    },
-    {
-      "center": {
-        "x": 198,
-        "z": 396
-      },
-      "widthIn": 34
+      "widthIn": 30
     }
   ],
   "windows": [
     {
       "center": {
-        "x": 300,
+        "x": 72,
         "z": 0
       },
       "widthIn": 72
     },
     {
       "center": {
-        "x": 408,
+        "x": 180,
+        "z": 0
+      },
+      "widthIn": 48
+    },
+    {
+      "center": {
+        "x": 0,
         "z": 96
       },
       "widthIn": 60
     },
     {
       "center": {
-        "x": 408,
-        "z": 330
+        "x": 0,
+        "z": 258
       },
       "widthIn": 48
     },
     {
       "center": {
-        "x": 78,
-        "z": 0
+        "x": 384,
+        "z": 240
       },
       "widthIn": 60
     },
     {
       "center": {
-        "x": 96,
-        "z": 480
-      },
-      "widthIn": 60
-    },
-    {
-      "center": {
-        "x": 300,
-        "z": 480
+        "x": 72,
+        "z": 468
       },
       "widthIn": 60
     }
@@ -283,111 +324,111 @@
     {
       "type": "fridge",
       "center": {
-        "x": 264,
-        "z": 378
+        "x": 21,
+        "z": 210
       },
-      "widthIn": 36,
+      "widthIn": 33,
       "depthIn": 30,
-      "facing": "up"
+      "facing": "down"
     },
     {
       "type": "stove",
       "center": {
-        "x": 312,
-        "z": 380
+        "x": 60,
+        "z": 208
       },
       "widthIn": 30,
       "depthIn": 26,
-      "facing": "up"
+      "facing": "down"
     },
     {
       "type": "kitchen_counter",
       "center": {
-        "x": 366,
-        "z": 380
+        "x": 114,
+        "z": 208
       },
-      "widthIn": 66,
+      "widthIn": 60,
       "depthIn": 25,
-      "facing": "up"
+      "facing": "down"
     },
     {
       "type": "kitchen_island",
       "center": {
-        "x": 330,
-        "z": 300
+        "x": 42,
+        "z": 264
       },
-      "widthIn": 72,
-      "depthIn": 36,
-      "facing": "up"
+      "widthIn": 56,
+      "depthIn": 32,
+      "facing": "down"
     },
     {
       "type": "sink_vanity",
       "center": {
-        "x": 108,
-        "z": 158
+        "x": 348,
+        "z": 328
       },
-      "widthIn": 42,
-      "depthIn": 22,
+      "widthIn": 40,
+      "depthIn": 21,
       "facing": "down"
     },
     {
       "type": "toilet",
       "center": {
-        "x": 18,
-        "z": 174
+        "x": 366,
+        "z": 388
       },
       "widthIn": 18,
-      "depthIn": 28,
-      "facing": "right"
+      "depthIn": 26,
+      "facing": "left"
     },
     {
       "type": "shower",
       "center": {
-        "x": 26,
-        "z": 226
+        "x": 348,
+        "z": 440
       },
-      "widthIn": 40,
-      "depthIn": 40,
-      "facing": "right"
-    },
-    {
-      "type": "washer_dryer",
-      "center": {
-        "x": 108,
-        "z": 282
-      },
-      "widthIn": 30,
-      "depthIn": 32,
-      "facing": "left"
+      "widthIn": 38,
+      "depthIn": 38,
+      "facing": "up"
     },
     {
       "type": "sink_vanity",
       "center": {
-        "x": 108,
-        "z": 382
+        "x": 252,
+        "z": 386
       },
-      "widthIn": 42,
-      "depthIn": 22,
-      "facing": "up"
+      "widthIn": 40,
+      "depthIn": 21,
+      "facing": "down"
     },
     {
       "type": "toilet",
       "center": {
-        "x": 18,
-        "z": 340
+        "x": 297,
+        "z": 414
       },
       "widthIn": 18,
       "depthIn": 28,
-      "facing": "right"
+      "facing": "left"
     },
     {
       "type": "shower",
       "center": {
-        "x": 26,
-        "z": 366
+        "x": 291,
+        "z": 442
       },
-      "widthIn": 40,
-      "depthIn": 40,
+      "widthIn": 38,
+      "depthIn": 38,
+      "facing": "up"
+    },
+    {
+      "type": "washer_dryer",
+      "center": {
+        "x": 270,
+        "z": 267
+      },
+      "widthIn": 30,
+      "depthIn": 32,
       "facing": "right"
     }
   ]
