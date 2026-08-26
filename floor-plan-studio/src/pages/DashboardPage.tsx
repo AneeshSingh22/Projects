@@ -59,9 +59,8 @@ export function DashboardPage() {
         {/* Set expectations before anyone hits a paywall-ish error mid-flow. */}
         <div className="mb-8 rounded-xl border border-neutral-800 bg-gradient-to-b from-neutral-900/70 to-neutral-900/30 p-4 text-sm text-neutral-400">
           <p>
-            <span className="font-medium text-neutral-200">Everything here is free to use.</span>{' '}
             Explore the example apartment, trace your own floor plan by hand, place furniture, and
-            walk around in 3D — no account, no key. Your work saves in this browser only.
+            walk around in 3D — no account needed. Your work saves in this browser only.
           </p>
           <p className="mt-2">
             Want the floor plan read <span className="italic">automatically</span> from an image?
