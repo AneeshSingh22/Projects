@@ -123,7 +123,7 @@ const fixtures = [
   { type: 'fridge',          center: { x: 18,  z: 216 }, widthIn: 33, depthIn: 30, facing: 'right' },
   { type: 'stove',           center: { x: 16,  z: 258 }, widthIn: 30, depthIn: 26, facing: 'right' },
   { type: 'kitchen_counter', center: { x: 160, z: 285 }, widthIn: 60, depthIn: 25, facing: 'up' },
-  { type: 'kitchen_island',  center: { x: 108, z: 252 }, widthIn: 66, depthIn: 32, facing: 'down' },
+  { type: 'kitchen_island',  center: { x: 104, z: 232 }, widthIn: 66, depthIn: 32, facing: 'down' },
 
   // Bathroom 1 (en-suite to Bedroom 1): vanity, toilet, shower.
   { type: 'sink_vanity', center: { x: 325, z: 356 },  widthIn: 40, depthIn: 21, facing: 'right' },
