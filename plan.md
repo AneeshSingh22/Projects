@@ -74,7 +74,7 @@ for Phase 1 — it must read `1` after five minutes of clicking around.
 
 | Layer | Choice | Why |
 |---|---|---|
-| Framework | Next.js 15, App Router, TypeScript | Typed schema catches errors early |
+| Framework | Next.js 16, App Router, TypeScript | Typed schema catches errors early |
 | Styling | Tailwind CSS | Fast, and pairs with shadcn |
 | Components | shadcn/ui | Copies source into the repo — no black-box dependency |
 | Map | `@vis.gl/react-google-maps` | `APIProvider` loads the Maps script once. Do not hand-roll a loader. |

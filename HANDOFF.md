@@ -4,7 +4,9 @@ This project was set up in a previous Claude Code session in a different folder
 (`OneDrive/Documents/Plate-Restaurant-Tracker`) and moved out of OneDrive to avoid
 `node_modules` sync problems. **No code has been written yet.**
 
-**State: pre-Phase 0.** Section 12 of `plan.md` ("First message back") is ALREADY DONE —
+**State: Phase 0 built (see DECISIONS.md). This file is historical context; DECISIONS.md is now authoritative for what exists.**
+
+~~State: pre-Phase 0.~~ Section 12 of `plan.md` ("First message back") is ALREADY DONE —
 do not repeat it. Pick up at section 5 below.
 
 ---
