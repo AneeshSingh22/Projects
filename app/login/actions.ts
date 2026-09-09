@@ -3,82 +3,44 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 
-export type AuthState = {
-  step: "email" | "code"
-  email: string
-  error?: string
-  notice?: string
-}
+export type AuthState = { error?: string; email: string }
 
-// Step 1 — ask Supabase to email a 6-digit code.
+// Sign-in only. There is deliberately no sign-up path in this app.
 //
-// This is signInWithOtp, the same call that sends a magic link. Which one the
-// user receives is decided entirely by the email template in the Supabase
-// dashboard: a template containing {{ .Token }} yields a code. We chose codes
-// over links because an installed iOS PWA has its own storage jar — a magic
-// link opens in Safari, the session lands there, and the installed app stays
-// logged out. A typed code is entered in whatever context the user is already
-// in, so it works in the PWA, on desktop, anywhere.
-export async function sendCode(
+// The single account is created by hand in the Supabase dashboard with
+// auto-confirm enabled. Exposing a sign-up form on a public URL would let
+// strangers create accounts against this project's quota - row level security
+// would keep them out of Aneesh's data, but they would still be consuming a
+// free tier sized for one person. Creating the account out-of-band removes the
+// question entirely, and costs nothing given there will only ever be one user.
+//
+// Password rather than emailed link or code: Supabase will not send a code
+// without paid-tier custom SMTP, and a magic link opens in Safari rather than
+// an installed iOS PWA, which would silently leave the installed app logged
+// out. A password is entered in whatever context the user is already in, and a
+// password manager fills it. See DECISIONS.md, Phase 0.
+export async function signIn(
   _prev: AuthState,
   formData: FormData,
 ): Promise<AuthState> {
   const email = String(formData.get("email") ?? "").trim().toLowerCase()
+  const password = String(formData.get("password") ?? "")
 
-  if (!email || !email.includes("@")) {
-    return { step: "email", email, error: "Enter a valid email address." }
+  if (!email || !password) {
+    return { email, error: "Enter your email and password." }
   }
 
   const supabase = await createClient()
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: { shouldCreateUser: true },
-  })
+  const { error } = await supabase.auth.signInWithPassword({ email, password })
 
   if (error) {
-    return { step: "email", email, error: error.message }
+    // Supabase returns a deliberately vague "Invalid login credentials" for both
+    // a wrong password and a nonexistent account, so the response cannot be used
+    // to discover which emails have accounts. Passing it through unchanged.
+    return { email, error: error.message }
   }
 
-  return { step: "code", email, notice: `Code sent to ${email}.` }
-}
-
-// Step 2 — exchange the typed code for a session.
-export async function verifyCode(
-  prev: AuthState,
-  formData: FormData,
-): Promise<AuthState> {
-  const email = String(formData.get("email") ?? prev.email).trim().toLowerCase()
-  const token = String(formData.get("code") ?? "").trim()
-
-  if (!/^\d{6}$/.test(token)) {
-    return { step: "code", email, error: "Enter the 6-digit code from your email." }
-  }
-
-  const supabase = await createClient()
-  // type "email" covers both sign-up and sign-in for an emailed OTP.
-  const { error } = await supabase.auth.verifyOtp({ email, token, type: "email" })
-
-  if (error) {
-    return { step: "code", email, error: error.message }
-  }
-
+  // Outside the error branch on purpose: redirect() works by throwing, so
+  // calling it inside a try/catch would have the catch swallow the redirect.
   redirect("/")
-}
-
-export async function startOver(): Promise<AuthState> {
-  return { step: "email", email: "" }
-}
-
-// Single entry point for the form. useActionState binds one action for the life
-// of the component, so the step is carried in a hidden `intent` field rather
-// than by swapping which action the form points at.
-export async function authenticate(
-  prev: AuthState,
-  formData: FormData,
-): Promise<AuthState> {
-  const intent = String(formData.get("intent") ?? "send")
-
-  if (intent === "reset") return { step: "email", email: "" }
-  if (intent === "verify") return verifyCode(prev, formData)
-  return sendCode(prev, formData)
 }

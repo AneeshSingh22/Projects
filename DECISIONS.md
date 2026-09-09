@@ -8,9 +8,9 @@ One entry per build phase. Written to be read on its own, without the code open.
 
 ### What got built
 
-A Next.js app that does exactly one thing: you enter your email, Supabase emails
-you a six-digit code, you type it in, and you land on a page that says you are
-signed in. Every other route is closed to anyone not signed in.
+A Next.js app that does exactly one thing: you enter your email and password and
+land on a page that says you are signed in. Every other route is closed to anyone
+not signed in.
 
 Alongside it, a `supabase/schema.sql` file holding the full database design —
 places, visits, photos, and the security rules that keep them private. It has not
@@ -22,19 +22,41 @@ built on top of it.
 
 ### The decisions worth explaining
 
-**We sign in with a six-digit code, not a magic link.**
+**We sign in with a password. This reverses the plan, twice.**
 
-The original plan said magic link: click a link in your email, you are in. That
-breaks in one specific place that matters here. Once this app is installed to an
-iPhone home screen, it gets its own private storage, separate from Safari.
-Tapping a magic link opens Safari, so the sign-in lands in Safari — and the
-installed app still shows you logged out, with no obvious reason why.
+The plan said magic link. We first changed that to an emailed six-digit code,
+then abandoned email entirely. Both changes were forced by things only visible
+once we tried them, and the reasoning is worth keeping.
 
-A typed code has no such problem, because you type it into whatever you are
-already looking at. Same Supabase call underneath either way; the difference is
-purely which one the email contains. The cost is one extra field to fill in. The
-benefit is that the thing does not mysteriously break in Phase 6, which is the
-phase where you would have discovered it.
+*Why not a magic link.* Once this app is installed to an iPhone home screen it
+gets its own private storage, separate from Safari. Tapping a magic link opens
+Safari, so the sign-in lands in Safari — and the installed app still shows you
+logged out, with no visible reason why. That is a bug you would hit in the final
+phase, having built everything on top of it.
+
+*Why not an emailed code.* A code is typed into whatever app you are already
+looking at, so it dodges the problem above. But Supabase will not put a code in
+the email unless you edit the email template, and it will not let you edit the
+template unless you configure your own outbound mail server. On top of that, the
+built-in sender is capped at a few messages an hour, which we hit while testing.
+Free mail providers exist, so this was solvable — but only by adding a permanent
+third-party account to a project whose whole point is costing nothing and having
+few moving parts.
+
+*Why a password works.* No email is sent at any point, so none of the above
+applies: no mail server, no templates, no rate limits, no third-party account,
+and the iPhone problem disappears because nothing ever leaves the app. A password
+manager fills it, so in daily use it is faster than waiting for an email. The
+plan's original argument for magic links was "no password to manage" — true, but
+the actual price turned out to be a hard dependency on email delivery, and that
+is the worse thing to own.
+
+*Why there is no sign-up page.* The single account is created by hand in the
+Supabase dashboard. A sign-up form on a public address would let strangers create
+accounts against this project's quota. They could not see any of your data — the
+security rules prevent that — but they would still be consuming a free tier sized
+for one person. With exactly one user forever, an account created out-of-band
+removes the question at no cost.
 
 **We are on Next.js 16, not Next.js 15 as the plan said.**
 
@@ -84,7 +106,10 @@ almost certainly run it, notice something, and run it again.
 ### What was rejected
 
 - **Legacy Supabase JWT keys** — being retired, and cannot be rotated cleanly.
-- **Magic-link sign-in** — see above; breaks once installed on a phone.
+- **Magic-link sign-in** — breaks once installed on a phone.
+- **Emailed six-digit codes** — needs a paid-tier mail server to edit the
+  template, plus a third-party mail account to maintain forever.
+- **A sign-up form** — nothing needs one, and it would expose the quota.
 - **Pinning Next.js 15** — a migration owed later for no benefit now.
 - **Reading the session from the cookie without verifying it** — faster, but the
   guard is load-bearing and being fast is not the point.
@@ -95,14 +120,12 @@ almost certainly run it, notice something, and run it again.
 
 - **`proxy.ts` runs on almost every request, and each run calls Supabase.** If
   pages ever feel slow, look here first. It deliberately skips images and fonts.
-- **The sign-in email must contain `{{ .Token }}`.** That template setting in the
-  Supabase dashboard is what makes the email carry a code. Without it the email
-  arrives with only a link and the code box has nothing to accept. This is a
-  dashboard setting, not code — it will not travel with the repo, and it will
-  need setting again on any new Supabase project.
-- **Supabase's built-in email sender is rate-limited to a handful per hour.** If
-  codes stop arriving while you are testing repeatedly, that is the limit, not a
-  bug.
+- **The account exists only in the Supabase dashboard.** It is not in the repo
+  and not in any migration. On a new Supabase project, no one can sign in until
+  a user is created by hand with auto-confirm enabled. Worth writing down
+  wherever you keep the password.
+- **Email sign-up should stay disabled in the dashboard.** If it is ever switched
+  on, the public URL becomes an open registration form.
 - **`SUPABASE_SERVICE_ROLE_KEY` is not used by any code yet.** It bypasses every
   security rule in the database. Nothing in the app needs it, and that should stay
   true unless there is a specific reason.
