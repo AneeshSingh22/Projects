@@ -190,3 +190,81 @@ because the commit history is meant to be readable as the build story.
 The tradeoff accepted here: two checkouts and one extra command per phase, in
 exchange for the project sitting where the other work sits. A standalone repo
 would have made this a plain `git push`.
+
+---
+
+## Phase 1 — The map, mounted once
+
+### What got built
+
+A full-screen Google map, centred on Shaw, DC, with the app's own header
+floating on top of it. That is all you can see. The work in this phase is almost
+entirely about a rule that is invisible when it is working.
+
+### The rule this phase exists to enforce
+
+Google charges per map *initialisation*, not per page view or per pan. A React
+component that rebuilds the map every time something changes on screen can fire
+thousands of billable loads in one afternoon of clicking around. The free
+allowance is 10,000 a month. This is the single realistic way this project ever
+generates a bill.
+
+So the map is created once when the app opens and is never rebuilt. Everything
+else — the search bar coming in next phase, the sliding sheet after that — is
+layered *beside* it rather than wrapped *around* it. Anything that wraps the map
+can rebuild it; anything beside it cannot. That is the whole architecture, and it
+is why the page is structured the way it is even though it currently holds almost
+nothing.
+
+### The counter that proves it
+
+There is a counter in the code, visible only during development, that prints
+`[MAP MOUNT] count = 1` to the browser console. If it ever prints 2, something
+has started rebuilding the map and it needs fixing before anything else.
+
+**This was rewritten rather than taken from the plan.** The original counted how
+many times a React component appeared. That number is wrong in two ordinary
+situations: React deliberately runs setup twice during development as a
+correctness check, so it read 2 immediately on a fresh load; and it remembered
+its count across page refreshes, so refreshing showed 2, then 3, then 4 — even
+though each refresh is legitimately one new map.
+
+Both of those are false alarms, and a warning that fires when nothing is wrong
+gets ignored within a day. At that point it is worse than having no warning,
+because it creates the impression of a safety net that is not there.
+
+What costs money is how many maps get built, so that is what is counted now, by
+tracking the map objects themselves rather than the React components around them.
+Development-mode double-runs and moving between pages correctly report 1. A real
+rebuild reports 2 and prints a loud error naming the likely causes. A full page
+refresh goes back to 1, which is correct, because a refresh genuinely is one new
+map.
+
+### Other decisions
+
+**Design tokens moved to CSS.** The plan put the colour palette in a Tailwind
+config file. Tailwind version 4, which this project uses, no longer has that
+file. Same palette, different location.
+
+**Two fonts, loaded at build time rather than fetched from Google.** Both are
+downloaded and bundled during the build, so the app makes no request to Google
+Fonts when someone opens it. Fraunces is loaded with its optical-size axis
+available, which matters for the oversized rating numeral in Phase 3 — type
+designed for large display sizes is drawn differently from type meant for body
+text, and using the wrong cut at 56px looks subtly clumsy.
+
+**The map ignores React for panning.** The map is told where to start, not where
+to be. Continuously telling it where to be would turn every drag into a
+re-render and fight the user's own gestures.
+
+### Known incomplete
+
+**The map style is not applied.** The plan calls for a dark, desaturated map with
+only restaurant labels showing. That style is configured in the Google Cloud
+console against the Map ID, not in this codebase, and it has not taken effect
+yet. The map currently renders in default Google colours.
+
+This is cosmetic and deliberately deferred. It changes no code, needs no rebuild,
+and can be applied at any time. Worth knowing: the palette in the plan was chosen
+against a dark map, so if the map stays light, the rating colours will need
+deepening to stay legible. That is a Phase 3 concern.
