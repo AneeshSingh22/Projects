@@ -268,3 +268,101 @@ This is cosmetic and deliberately deferred. It changes no code, needs no rebuild
 and can be applied at any time. Worth knowing: the palette in the plan was chosen
 against a dark map, so if the map stays light, the rating colours will need
 deepening to stay legible. That is a Phase 3 concern.
+
+---
+
+## Phase 2 — Search, add, and pins
+
+### What got built
+
+Three ways to get a restaurant onto the map: search for it by name, tap a
+restaurant label Google already draws on the map, or long-press an empty spot
+and name it yourself. Everything added shows as a pin, and the pins come from
+your own database rather than from Google.
+
+### The cost rules this phase had to obey
+
+This is the phase where the app starts talking to Google's paid APIs, so the
+money constraint stops being theoretical.
+
+**Searching is billed by session, not by keystroke.** Type "daikaya" and that is
+seven requests. Google's pricing forgives all of them *if* they carry a shared
+session token and the session is closed by looking up the place you picked. Then
+you pay for one lookup instead of seven searches.
+
+The trap is that a token is single-use. Reuse one after its session closed and
+billing silently reverts to per-keystroke — silently, with no error and no
+warning, the invoice just changes. Because the failure is invisible, the token
+lifecycle lives in one small file of its own rather than being spread through
+the interface code, so it can be checked in one place.
+
+Searching is also delayed by a quarter second after you stop typing, so a
+five-letter word is one request rather than five.
+
+**Only cheap fields are ever requested.** Google splits place data into tiers.
+Name, address, coordinates and category are the cheap tier, with an allowance
+roughly ten times the expensive one. Photos, reviews and ratings are the
+expensive tier. The code requests the cheap set explicitly and never the
+expensive one. This was tested against the live API rather than assumed.
+
+**Once a place is saved, Google is never asked about it again.** The map draws
+entirely from your own database. Adding somewhere already on your map returns
+what is already there instead of asking Google a second time.
+
+**No "search this area" button, ever.** That feature would call the most
+expensive endpoint on every map pan. The plan forbids it and so does this. The
+restaurant names already visible on the base map are free, because they are
+painted into the map images rather than fetched.
+
+### The thing that surprised me
+
+The plan described using Google's ready-made search box. That component was
+retired in March 2025, and the newer API this project is set up for does not
+offer it at all. The replacement is assembled by hand from two separate calls.
+
+Practical consequence: almost every tutorial and code sample online shows the
+retired approach. If this code ever needs changing and something found online
+looks much simpler, that is probably why — and it will not work against this
+project's setup.
+
+### Loading every place at once
+
+The plan called for asking the database only for places inside the current map
+view, refreshed as you pan. That was dropped in favour of loading everything
+once when the app opens.
+
+One person's restaurant list is a rounded-up tenth of a megabyte. Loading it
+once removes a network request from every pan, removes a whole class of bug
+where a fast pan lands results out of order, and means the offline support in a
+later phase is nearly free because the data is already there.
+
+The database still carries the indexes the original approach would have needed,
+so switching back later is a small change. The real limit is not the loading but
+how many pins a map can draw smoothly, which is somewhere in the thousands.
+
+### A bug worth remembering
+
+The long-press feature was first written by hand, using a timer to detect a
+held finger and some arithmetic to turn the touch position into a location.
+Both halves were wrong. React clears the event details before a timer fires, so
+it would never have triggered. And converting a screen position into a
+coordinate by simple proportion is inaccurate on a map, because map projections
+stretch north-south — close enough when zoomed into one street, badly wrong when
+zoomed out.
+
+Both problems disappeared by using the map's own built-in event, which reports
+the exact location directly. Worth remembering as a general lesson: the
+hand-rolled version was more code, and wrong in ways that would not have shown
+up until someone used it far from where it was tested.
+
+### Verified
+
+- Search found the intended restaurant through the new API.
+- A place lookup returned name, address, coordinates, category, city and
+  country, with no expensive-tier fields present.
+- A place saved and reloaded correctly.
+- The automatic "last modified" timestamp genuinely updates on edit — confirmed
+  by editing a live row and watching it change.
+- The map still initialises exactly once after adding search, selection, dialogs
+  and a growing set of pins. This is the check that matters most, and it was
+  confirmed by hand in the browser.
