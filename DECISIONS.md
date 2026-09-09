@@ -138,11 +138,38 @@ npm was two major versions behind what this Node install expects, which caused
 package downloads to fail outright. Upgrading fixed it. If installs start failing
 strangely again, check the npm version first.
 
-### Still outstanding at the end of this phase
+### Phase 0 acceptance: met
 
-- The schema has not been run against the database yet.
-- No GitHub repo and no Vercel deploy, so the acceptance test — open the URL on
-  your phone and sign in — has been met locally but not in production.
+Live at https://plate-restaurant-tracker.vercel.app — signed in on an iPhone,
+launched from a home-screen icon. That last detail is the one worth noting: it is
+exactly the scenario that would have failed with a magic link, so the password
+decision was validated by the acceptance test rather than only argued for.
+
+Verified rather than assumed, before declaring the phase done:
+
+- All three tables exist (queried directly with the secret key).
+- The `visit-photos` bucket exists and is private.
+- Security rules genuinely deny. An anonymous insert was rejected with
+  `42501 new row violates row-level security policy`. Reading an empty table
+  proves nothing, so the check was a write.
+- No credentials in any commit. Every commit and blob was scanned for key
+  patterns before the first public push.
+
+### One deliberate gap
+
+The Maps API key is restricted to `localhost:3000` and the production domain
+only. Preview deployments will not render a map.
+
+Google will not accept a wildcard in the middle of a hostname, so covering
+previews meant allowing `https://*.vercel.app/*` — every site on vercel.app,
+not just ours. That was judged not worth it. A `NEXT_PUBLIC_` key ships in the
+browser bundle and is readable by anyone regardless, and the Referer header is
+trivially forged, so the referrer list was never the real protection. The daily
+quota caps are. Worst case from a leaked key is an exhausted daily quota, not a
+bill.
+
+If a preview ever needs a working map, the fix is to add that preview's exact
+URL rather than to widen the pattern.
 
 ### How this repo reaches GitHub
 
