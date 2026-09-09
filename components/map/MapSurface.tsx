@@ -6,6 +6,7 @@ import { MapMountCounter } from "./MapMountCounter"
 import { SearchPill } from "./SearchPill"
 import { PlacePin } from "./PlacePin"
 import { PoiPrompt, type PoiCandidate } from "./PoiPrompt"
+import { CustomPinPrompt, type PinCandidate } from "./CustomPinPrompt"
 import type { PlaceMarker } from "@/types/db"
 
 const SHAW_DC = { lat: 38.9126, lng: -77.0219 }
@@ -23,7 +24,27 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
   const [places, setPlaces] = useState<PlaceMarker[]>(initialPlaces)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [poi, setPoi] = useState<PoiCandidate | null>(null)
+  const [dropped, setDropped] = useState<PinCandidate | null>(null)
   const [toast, setToast] = useState<string | null>(null)
+
+  // Long-press to drop a custom pin - plan.md section 9, Phase 2.
+  //
+  // Implemented with the map's own `contextmenu` event rather than hand-rolled
+  // pointer timers. Browsers already synthesise contextmenu from a touch
+  // long-press, and Google delivers an exact latLng with it.
+  //
+  // The hand-rolled version this replaces had two bugs worth remembering:
+  // React nulls `event.currentTarget` once the handler returns, so reading it
+  // inside the timer always failed; and converting a pixel to a coordinate by
+  // interpolating linearly between the viewport bounds is wrong in latitude,
+  // because Mercator is non-linear on that axis. Both disappear here.
+  const handleLongPress = useCallback((e: MapMouseEvent) => {
+    const latLng = e.detail.latLng
+    if (!latLng) return
+    e.stop()
+    setPoi(null)
+    setDropped({ lat: latLng.lat, lng: latLng.lng })
+  }, [])
 
   const handleAdded = useCallback(
     (place: PlaceMarker, alreadyExisted: boolean) => {
@@ -81,6 +102,7 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
         disableDefaultUI
         reuseMaps
         onClick={handleMapClick}
+        onContextmenu={handleLongPress}
         className="absolute inset-0 h-full w-full"
       >
         <MapMountCounter />
@@ -105,7 +127,15 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
         </div>
       </div>
 
-      {poi && (
+      {dropped && (
+        <CustomPinPrompt
+          candidate={dropped}
+          onAdded={handleAdded}
+          onDismiss={() => setDropped(null)}
+        />
+      )}
+
+      {poi && !dropped && (
         <PoiPrompt
           candidate={poi}
           onAdded={handleAdded}
