@@ -143,3 +143,23 @@ strangely again, check the npm version first.
 - The schema has not been run against the database yet.
 - No GitHub repo and no Vercel deploy, so the acceptance test — open the URL on
   your phone and sign in — has been met locally but not in production.
+
+### How this repo reaches GitHub
+
+The code lives on GitHub inside `AneeshSingh22/Projects`, in the
+`plate-restaurant-tracker/` subfolder, rather than in a repo of its own. That is
+a portfolio repo holding ten other projects.
+
+Because of that, this working folder is a **standalone git repo that is not a
+clone of Projects**. Committing here does not push anywhere. Publishing is a
+separate step, done by running `./sync-to-github.sh`, which grafts the commits
+into the subfolder of a second checkout kept at `c:/Users/Singh/projects/Projects`
+and pushes that.
+
+This uses git's subtree support, so the individual phase commits survive into the
+portfolio repo's history instead of being flattened into one lump. That matters
+because the commit history is meant to be readable as the build story.
+
+The tradeoff accepted here: two checkouts and one extra command per phase, in
+exchange for the project sitting where the other work sits. A standalone repo
+would have made this a plain `git push`.
