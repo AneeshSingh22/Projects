@@ -3,13 +3,20 @@
 import { AdvancedMarker } from "@vis.gl/react-google-maps"
 import type { PlaceMarker } from "@/types/db"
 
-// plan.md section 8: hollow outline for want_to_try, filled for everything
-// else. Colour comes from the rating ramp; Phase 3 will interpolate by actual
-// rating, so for now status drives it.
-function fillFor(status: PlaceMarker["status"]): string {
+// plan.md section 8: hollow for want_to_try, filled for everything else, with
+// colour carrying meaning from the rating ramp.
+//
+// The ramp was designed against a dark map. Until the Map ID style is applied
+// the base map is bright, so pins are drawn with a solid core, a white ring and
+// a drop shadow. That reads on either background, so it is kept rather than
+// being a temporary patch.
+function colorFor(status: PlaceMarker["status"]): string {
   switch (status) {
+    // No rating yet, so no position on the ramp. Given a warm red so it is
+    // findable, and kept hollow-cored so it stays visually distinct from a
+    // place that has actually been rated.
     case "want_to_try":
-      return "transparent"
+      return "var(--color-r-good)"
     case "avoid":
       return "var(--color-r-low)"
     case "favorite":
@@ -19,8 +26,8 @@ function fillFor(status: PlaceMarker["status"]): string {
   }
 }
 
-// Rendered from an array as data-driven children (section 5, Rule 3). Adding,
-// removing or recolouring a pin must never touch the map instance itself.
+// Data-driven children (section 5, Rule 3). Adding, removing or recolouring a
+// pin must never touch the map instance.
 export function PlacePin({
   place,
   selected,
@@ -30,7 +37,9 @@ export function PlacePin({
   selected: boolean
   onSelect: (place: PlaceMarker) => void
 }) {
-  const hollow = place.status === "want_to_try"
+  const color = colorFor(place.status)
+  const wishlist = place.status === "want_to_try"
+  const size = selected ? 24 : 18
 
   return (
     <AdvancedMarker
@@ -39,18 +48,23 @@ export function PlacePin({
       onClick={() => onSelect(place)}
       zIndex={selected ? 10 : 1}
     >
-      <div
-        className="rounded-full transition-transform"
-        style={{
-          width: selected ? 22 : 16,
-          height: selected ? 22 : 16,
-          background: fillFor(place.status),
-          border: `2.5px solid ${
-            hollow ? "var(--color-r-none)" : "rgba(255,255,255,0.85)"
-          }`,
-          boxShadow: "0 1px 4px rgba(0,0,0,0.5)",
-        }}
-      />
+      {/* Transparent padding around the dot: the visible pin stays small and
+          quiet, while the touch target meets the ~44px minimum for a thumb. */}
+      <div className="flex h-11 w-11 items-center justify-center">
+        <div
+          className="rounded-full transition-all duration-150"
+          style={{
+            width: size,
+            height: size,
+            // Wishlist reads as a ring; anything rated reads as a solid dot.
+            background: wishlist ? "var(--color-surface)" : color,
+            border: `${wishlist ? 4 : 3}px solid ${color}`,
+            boxShadow: selected
+              ? `0 0 0 3px rgba(255,255,255,0.9), 0 2px 8px rgba(0,0,0,0.6)`
+              : `0 0 0 1.5px rgba(255,255,255,0.75), 0 1px 5px rgba(0,0,0,0.45)`,
+          }}
+        />
+      </div>
     </AdvancedMarker>
   )
 }
