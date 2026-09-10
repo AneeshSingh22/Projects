@@ -7,6 +7,8 @@ import { SearchPill } from "./SearchPill"
 import { PlacePin } from "./PlacePin"
 import { PoiPrompt, type PoiCandidate } from "./PoiPrompt"
 import { CustomPinPrompt, type PinCandidate } from "./CustomPinPrompt"
+import { PlaceSheet } from "@/components/visit/PlaceSheet"
+import { getPlaces } from "@/app/actions/refresh"
 import type { PlaceMarker } from "@/types/db"
 
 const SHAW_DC = { lat: 38.9126, lng: -77.0219 }
@@ -44,6 +46,13 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
     e.stop()
     setPoi(null)
     setDropped({ lat: latLng.lat, lng: latLng.lng })
+  }, [])
+
+  // Re-read places after a visit is logged: logging flips want_to_try to
+  // visited, and the pin has to recolour to match (section 9, Phase 3).
+  const refreshPlaces = useCallback(async () => {
+    const fresh = await getPlaces()
+    setPlaces(fresh)
   }, [])
 
   const handleAdded = useCallback(
@@ -90,6 +99,8 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
     },
     [places],
   )
+
+  const selected = places.find((p) => p.id === selectedId) ?? null
 
   return (
     <div className="relative h-dvh w-full overflow-hidden">
@@ -142,6 +153,15 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
           onDismiss={() => setPoi(null)}
         />
       )}
+
+      {/* Sibling of the map, never a wrapper. Opening, closing and dragging
+          the sheet re-renders only this subtree - the map instance is never
+          touched, which is what keeps the mount count at 1. */}
+      <PlaceSheet
+        place={selected}
+        onClose={() => setSelectedId(null)}
+        onChanged={refreshPlaces}
+      />
 
       {toast && (
         <div className="pointer-events-none absolute inset-x-0 bottom-8 z-20 flex justify-center px-4">
