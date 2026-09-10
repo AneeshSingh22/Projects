@@ -366,3 +366,94 @@ up until someone used it far from where it was tested.
 - The map still initialises exactly once after adding search, selection, dialogs
   and a growing set of pins. This is the check that matters most, and it was
   confirmed by hand in the browser.
+
+---
+
+## Phase 3 — Logging a visit
+
+### What got built
+
+Tapping a pin slides up a panel from the bottom of the screen. It shows the
+place, its average rating as a large numeral, and every visit logged there.
+From it you can log a new visit, edit an old one, delete one, or remove the
+place entirely.
+
+The panel drags between three heights: a peek showing just the name and score,
+a half height, and nearly full screen for the whole history. The map stays
+visible and usable behind it the entire time. It is a sheet, not a dialog.
+
+### The rating colours were changed from the plan
+
+The plan specified a scale running pale, through ochre, to a dark chili red,
+with red as the highest rating. Themed on the way food browns.
+
+It was replaced with muted grey, through amber, to green.
+
+The reason is what the map is actually for. Red is the loudest colour
+available, and the original scale spent it on places that were merely good,
+while a bad place and a great one both read as broadly warm. When the map is
+being scanned for somewhere to eat, that is backwards. Now a poor rating
+recedes into grey and stays quiet, and the best places are the only strongly
+saturated things on screen.
+
+The greens are deliberately deep and slightly dulled rather than a bright
+signal green, because maps are already full of green for parks, and pins must
+not be mistaken for landmarks.
+
+What was kept from the plan: one continuous scale rather than a handful of
+fixed brackets, so a 7.5 sits visibly between a 7 and an 8, and the scale
+remains the loudest thing in the app.
+
+### A bug worth recording
+
+Pins were originally coloured by whether a place had been visited, not by how
+good it was. So a restaurant rated 0.5 and one rated 10 looked identical. The
+colour scale existed but carried no information.
+
+Fixed by working out each place's average rating when the map loads and
+colouring from that. Pins now also show the number itself, so the map can be
+read without opening anything.
+
+The general lesson: the scale was correct and tested in isolation, and the
+component that used it simply never passed it the rating. Testing the piece is
+not the same as testing that it is wired up.
+
+### The panel froze the rest of the app
+
+On first build, opening the panel made everything else unresponsive. The map
+would not drag, search could not be reached, and there was no way back out.
+
+The panel library was told not to behave as a dialog, but that setting alone
+does not stop it covering the screen with an invisible layer that absorbs every
+tap. The layer had to be disabled explicitly.
+
+An explicit close button was added at the same time. Dragging the panel down to
+dismiss it works, but there is nothing on screen that suggests it, and on a
+computer there is no equivalent gesture at all.
+
+### Deleting a place asks a specific question
+
+The database is set up so that removing a place also removes its visits, and
+removing a visit also removes its photos. That is deliberate - a visit
+belonging to a restaurant that no longer exists would be worse.
+
+But it means deleting a pin can destroy years of notes. So the confirmation
+says exactly what will be lost, naming the number of visits, rather than asking
+a generic "are you sure?". The plan's whole argument is that the visit history
+is the point of the app, and a vague prompt would not respect that.
+
+### Other decisions
+
+**The rating slider is a standard browser control**, not a custom one. It gets
+keyboard support, screen-reader support and the phone's own drag feel for free.
+The coloured track is the only part that is bespoke.
+
+**The one animation in the app** is the big rating number counting up when the
+panel opens. It is skipped entirely, not merely shortened, for anyone whose
+system asks for reduced motion.
+
+**Logging a visit only promotes a place from "want to try" to "visited".** If
+somewhere had been deliberately marked a favourite, or as somewhere to avoid,
+logging a meal will not quietly undo that.
+
+**Visits are never overwritten.** Four meals is four records.
