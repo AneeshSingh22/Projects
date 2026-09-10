@@ -6,6 +6,9 @@ import { Pencil, Trash2, Plus, X, MapPinOff } from "lucide-react"
 import { getPlaceDetail } from "@/app/actions/place-detail"
 import { deleteVisit } from "@/app/actions/visits"
 import { deletePlace, getPlaceDeleteImpact } from "@/app/actions/places"
+import { getSignedPhotos, type SignedPhoto } from "@/app/actions/photos"
+import { PhotoUpload } from "./PhotoUpload"
+import { PhotoStrip } from "./PhotoStrip"
 import { VisitForm } from "./VisitForm"
 import { CountUp } from "./CountUp"
 import { ratingColor, formatRating, RATING_NONE } from "@/lib/rating/ramp"
@@ -43,6 +46,9 @@ export function PlaceSheet({
     null,
   )
   const [deleting, setDeleting] = useState(false)
+  // Photos for every visit on this place, signed in one batch when the sheet
+  // opens rather than one request per thumbnail (HANDOFF 5a item 7).
+  const [photos, setPhotos] = useState<Record<string, SignedPhoto[]>>({})
 
   const placeId = place?.id ?? null
 
@@ -69,6 +75,21 @@ export function PlaceSheet({
     setMode("view")
     setSnap(SNAP_POINTS[1])
   }
+
+  // Signed URLs expire, so they are fetched per sheet-open rather than stored.
+  const visitIds = (detail?.visits ?? []).map((v) => v.id).join(",")
+  useEffect(() => {
+    if (!visitIds) {
+      return
+    }
+    let cancelled = false
+    getSignedPhotos(visitIds.split(",")).then((p) => {
+      if (!cancelled) setPhotos(p)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [visitIds])
 
   function reload() {
     if (!placeId) return
@@ -243,6 +264,13 @@ export function PlaceSheet({
                                 ${Number(v.price_paid).toFixed(2)}
                               </p>
                             )}
+                            <PhotoStrip
+                              photos={photos[v.id] ?? []}
+                              onChanged={reload}
+                            />
+                            <div className="mt-2">
+                              <PhotoUpload visitId={v.id} onUploaded={reload} />
+                            </div>
                           </div>
                           <div className="flex shrink-0 items-center gap-2">
                             {v.rating != null && (
