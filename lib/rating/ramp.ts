@@ -1,27 +1,41 @@
-// The rating ramp - plan.md section 8.
+// The rating ramp.
 //
-// "Interpolate between stops for in-between ratings rather than using five hard
-// buckets - a 7.5 should sit visibly between a 7 and an 8."
+// DEVIATION FROM plan.md SECTION 8, chosen deliberately.
 //
-// The ramp runs the way food browns: pale and raw at the low end, deepening
-// through ochre to a dark chili red at the top. It is the one place the app is
-// allowed to be loud, so it is worth getting exactly right.
+// Section 8 specified pale -> ochre -> dark chili red, with red as the top of
+// the scale, themed on the way food browns. It reads well in the abstract but
+// fails the job the map actually does: red is the loudest colour available, so
+// the plan's ramp shouted hardest about places that were merely good, while a
+// bad place and a great one both read as "warm".
+//
+// This ramp runs grey -> amber -> green instead:
+//
+//   - Low ratings are desaturated grey-blue. They recede. A place you did not
+//     like should not compete for attention on a map you are scanning for
+//     somewhere to eat.
+//   - The middle is amber, which is where "fine, would go back" sits.
+//   - The top is green, and it is the only strongly saturated colour on screen,
+//     so the best places are what your eye lands on first.
+//
+// The greens are deliberately deep and slightly desaturated rather than a
+// bright signal green, because a map already contains green for parks and
+// landmarks and the pins must not be mistaken for those.
+//
+// Section 8's principle - one interpolated ramp, the loudest thing in the app,
+// no hard buckets - is kept. Only the hues changed.
 
 export type Rgb = [number, number, number]
 
-// Kept in sync with the tokens in globals.css. Duplicated here as numbers
-// because interpolation needs channel values, and CSS custom properties are
-// strings that are not readable from JS without a live DOM.
 const STOPS: { at: number; rgb: Rgb }[] = [
-  { at: 0, rgb: [126, 146, 152] }, // --r-low   #7E9298
-  { at: 4, rgb: [126, 146, 152] }, // --r-low   flat through the low end
-  { at: 6, rgb: [201, 151, 63] },  // --r-mid   #C9973F
-  { at: 8, rgb: [210, 84, 46] },   // --r-good  #D2542E
-  { at: 10, rgb: [168, 42, 40] },  // --r-top   #A82A28
+  { at: 0, rgb: [110, 132, 137] }, // muted grey-blue: bad, and quiet about it
+  { at: 4, rgb: [126, 146, 152] }, // still receding
+  { at: 6, rgb: [201, 151, 63] }, // amber: acceptable
+  { at: 8, rgb: [106, 153, 78] }, // green: good
+  { at: 10, rgb: [45, 122, 62] }, // deep green: the best places
 ]
 
-// Wishlist: no rating, so no position on the ramp at all.
-export const RATING_NONE = "#6E8489" // --r-none
+// Wishlist: no rating yet, so no position on the ramp at all.
+export const RATING_NONE = "#6E8489"
 
 function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t

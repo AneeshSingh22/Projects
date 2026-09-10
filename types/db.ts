@@ -28,7 +28,13 @@ export type Place = {
 export type PlaceMarker = Pick<
   Place,
   "id" | "name" | "lat" | "lng" | "status" | "cuisine" | "google_place_id"
->
+> & {
+  // Carried on the marker so a pin can be coloured by how good the place is
+  // rather than merely whether it has been visited. Computed in the query, not
+  // stored on the row - section 7 keeps derived values out of the table.
+  avg_rating: number | null
+  visit_count: number
+}
 
 export type Visit = {
   id: string
