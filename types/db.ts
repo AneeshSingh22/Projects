@@ -29,3 +29,31 @@ export type PlaceMarker = Pick<
   Place,
   "id" | "name" | "lat" | "lng" | "status" | "cuisine" | "google_place_id"
 >
+
+export type Visit = {
+  id: string
+  place_id: string
+  user_id: string
+  visited_on: string
+  rating: number | null
+  notes: string | null
+  dishes: string[] | null
+  companions: string[] | null
+  price_paid: number | null
+  would_return: boolean | null
+  occasion: string | null
+  created_at: string
+}
+
+// A place plus the derived values the sheet shows. Section 7 is explicit that
+// these are computed rather than denormalised onto places until there is a
+// measured reason.
+export type PlaceDetail = PlaceMarker & {
+  address: string | null
+  city: string | null
+  notes: string | null
+  visits: Visit[]
+  visitCount: number
+  avgRating: number | null
+  lastVisitedOn: string | null
+}

@@ -1,0 +1,232 @@
+"use client"
+
+import { useEffect, useState, useTransition } from "react"
+import { Drawer } from "vaul"
+import { Pencil, Trash2, Plus } from "lucide-react"
+import { getPlaceDetail } from "@/app/actions/place-detail"
+import { deleteVisit } from "@/app/actions/visits"
+import { VisitForm } from "./VisitForm"
+import { CountUp } from "./CountUp"
+import { ratingColor, formatRating, RATING_NONE } from "@/lib/rating/ramp"
+import type { PlaceDetail, PlaceMarker, Visit } from "@/types/db"
+
+// Three detents - plan.md section 8: peek (name + rating), half (photos + last
+// visit), full (complete history). vaul expresses these as snap points, which
+// is why it was worth a dependency: the alternative is roughly 200 lines of
+// pointer maths for the app's single most-used interaction.
+const SNAP_POINTS = [0.18, 0.55, 0.96]
+
+function formatDate(iso: string): string {
+  const [y, m, d] = iso.split("-").map(Number)
+  return new Date(y, m - 1, d).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  })
+}
+
+export function PlaceSheet({
+  place,
+  onClose,
+  onChanged,
+}: {
+  place: PlaceMarker | null
+  onClose: () => void
+  onChanged: () => void
+}) {
+  const [detail, setDetail] = useState<PlaceDetail | null>(null)
+  const [snap, setSnap] = useState<number | string | null>(SNAP_POINTS[1])
+  const [mode, setMode] = useState<"view" | "new" | { edit: Visit }>("view")
+  const [, startTransition] = useTransition()
+
+  const placeId = place?.id ?? null
+
+  useEffect(() => {
+    if (!placeId) return
+    let cancelled = false
+    getPlaceDetail(placeId).then((d) => {
+      if (!cancelled) setDetail(d)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [placeId])
+
+  // Reset to the history view whenever a different place is opened, so the
+  // sheet never opens showing a half-filled form for the previous place.
+  //
+  // Keyed off placeId rather than synced in an effect: storing which place the
+  // current mode belongs to lets the reset be derived at render, which avoids
+  // a cascading second render every time a pin is tapped.
+  const [modeFor, setModeFor] = useState<string | null>(placeId)
+  if (modeFor !== placeId) {
+    setModeFor(placeId)
+    setMode("view")
+    setSnap(SNAP_POINTS[1])
+  }
+
+  function reload() {
+    if (!placeId) return
+    getPlaceDetail(placeId).then(setDetail)
+    onChanged()
+  }
+
+  const open = place != null
+  // Only trust detail that belongs to the place currently open, so a slow load
+  // for a previous pin cannot render under this one's name.
+  const shown = detail?.id === placeId ? detail : null
+  const avg = shown?.avgRating ?? null
+
+  return (
+    <Drawer.Root
+      open={open}
+      onOpenChange={(o) => !o && onClose()}
+      snapPoints={SNAP_POINTS}
+      activeSnapPoint={snap}
+      setActiveSnapPoint={setSnap}
+      // Bottom sheet, not modal - section 8 requires the map stay visible and
+      // interactive behind it.
+      modal={false}
+    >
+      <Drawer.Portal>
+        <Drawer.Content
+          className="bg-surface border-line fixed inset-x-0 bottom-0 z-30 mx-auto flex h-[96dvh] max-w-md flex-col rounded-t-2xl border-t outline-none md:right-auto md:left-4 md:w-[380px]"
+          aria-describedby={undefined}
+        >
+          <div className="bg-line mx-auto mt-3 h-1 w-10 shrink-0 rounded-full" />
+
+          <div className="flex-1 overflow-y-auto overscroll-contain px-4 pb-6">
+            <div className="flex items-start justify-between gap-4 pt-3">
+              <div className="min-w-0">
+                <Drawer.Title className="font-display text-text truncate text-xl leading-tight">
+                  {place?.name ?? ""}
+                </Drawer.Title>
+                <p className="text-text-dim mt-0.5 truncate text-xs">
+                  {[shown?.cuisine?.replaceAll("_", " "), shown?.city]
+                    .filter(Boolean)
+                    .join(" · ") || " "}
+                </p>
+              </div>
+              <span
+                className="font-display shrink-0 leading-none tabular-nums"
+                style={{
+                  fontSize: "var(--text-rating)",
+                  color: avg == null ? RATING_NONE : ratingColor(avg),
+                }}
+              >
+                {avg == null ? "–" : <CountUp value={avg} />}
+              </span>
+            </div>
+
+            <p className="text-text-dim mt-2 text-xs">
+              {shown == null
+                ? "Loading…"
+                : shown.visitCount === 0
+                  ? "No visits yet"
+                  : `${shown.visitCount} visit${shown.visitCount === 1 ? "" : "s"}${
+                      shown.lastVisitedOn
+                        ? ` · last ${formatDate(shown.lastVisitedOn)}`
+                        : ""
+                    }`}
+            </p>
+
+            <div className="mt-4">
+              {mode === "view" ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode("new")
+                      setSnap(SNAP_POINTS[2])
+                    }}
+                    className="bg-r-good text-text flex w-full items-center justify-center gap-2 rounded-full px-4 py-3 text-sm font-medium"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Log a visit
+                  </button>
+
+                  <ul className="mt-5 space-y-3">
+                    {shown?.visits.map((v) => (
+                      <li key={v.id} className="border-line rounded-xl border p-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <span className="text-text-dim text-xs">
+                              {formatDate(v.visited_on)}
+                            </span>
+                            {v.dishes?.length ? (
+                              <p className="text-text mt-1 text-sm">
+                                {v.dishes.join(", ")}
+                              </p>
+                            ) : null}
+                            {v.companions?.length ? (
+                              <p className="text-text-dim mt-0.5 text-xs">
+                                with {v.companions.join(", ")}
+                              </p>
+                            ) : null}
+                            {v.notes && (
+                              <p className="text-text-dim mt-1 text-sm">{v.notes}</p>
+                            )}
+                            {v.price_paid != null && (
+                              <p className="text-text-dim mt-1 text-xs">
+                                ${Number(v.price_paid).toFixed(2)}
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex shrink-0 items-center gap-2">
+                            {v.rating != null && (
+                              <span
+                                className="font-display text-lg leading-none tabular-nums"
+                                style={{ color: ratingColor(Number(v.rating)) }}
+                              >
+                                {formatRating(Number(v.rating))}
+                              </span>
+                            )}
+                            <button
+                              type="button"
+                              aria-label="Edit visit"
+                              onClick={() => {
+                                setMode({ edit: v })
+                                setSnap(SNAP_POINTS[2])
+                              }}
+                              className="text-text-dim hover:text-text"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </button>
+                            <button
+                              type="button"
+                              aria-label="Delete visit"
+                              onClick={() => {
+                                if (!confirm("Delete this visit?")) return
+                                startTransition(async () => {
+                                  await deleteVisit(v.id)
+                                  reload()
+                                })
+                              }}
+                              className="text-text-dim hover:text-r-good"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : (
+                <VisitForm
+                  placeId={placeId!}
+                  existing={typeof mode === "object" ? mode.edit : undefined}
+                  onSaved={() => {
+                    setMode("view")
+                    reload()
+                  }}
+                  onCancel={() => setMode("view")}
+                />
+              )}
+            </div>
+          </div>
+        </Drawer.Content>
+      </Drawer.Portal>
+    </Drawer.Root>
+  )
+}
