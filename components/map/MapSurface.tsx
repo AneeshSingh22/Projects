@@ -8,6 +8,7 @@ import { PlacePin } from "./PlacePin"
 import { PoiPrompt, type PoiCandidate } from "./PoiPrompt"
 import { CustomPinPrompt, type PinCandidate } from "./CustomPinPrompt"
 import { PlaceSheet } from "@/components/visit/PlaceSheet"
+import { StorageMeter } from "@/components/visit/StorageMeter"
 import { getPlaces } from "@/app/actions/refresh"
 import type { PlaceMarker } from "@/types/db"
 
@@ -162,6 +163,10 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
         onClose={() => setSelectedId(null)}
         onChanged={refreshPlaces}
       />
+
+      {/* Storage total - section 9, Phase 4. Free tier is 1GB and knowing where
+          you stand is the difference between noticing and being surprised. */}
+      <StorageMeter />
 
       {toast && (
         <div className="pointer-events-none absolute inset-x-0 bottom-8 z-20 flex justify-center px-4">
