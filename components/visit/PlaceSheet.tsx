@@ -2,9 +2,10 @@
 
 import { useEffect, useState, useTransition } from "react"
 import { Drawer } from "vaul"
-import { Pencil, Trash2, Plus } from "lucide-react"
+import { Pencil, Trash2, Plus, X, MapPinOff } from "lucide-react"
 import { getPlaceDetail } from "@/app/actions/place-detail"
 import { deleteVisit } from "@/app/actions/visits"
+import { deletePlace, getPlaceDeleteImpact } from "@/app/actions/places"
 import { VisitForm } from "./VisitForm"
 import { CountUp } from "./CountUp"
 import { ratingColor, formatRating, RATING_NONE } from "@/lib/rating/ramp"
@@ -38,6 +39,10 @@ export function PlaceSheet({
   const [snap, setSnap] = useState<number | string | null>(SNAP_POINTS[1])
   const [mode, setMode] = useState<"view" | "new" | { edit: Visit }>("view")
   const [, startTransition] = useTransition()
+  const [confirmDelete, setConfirmDelete] = useState<null | { visitCount: number }>(
+    null,
+  )
+  const [deleting, setDeleting] = useState(false)
 
   const placeId = place?.id ?? null
 
@@ -84,16 +89,41 @@ export function PlaceSheet({
       snapPoints={SNAP_POINTS}
       activeSnapPoint={snap}
       setActiveSnapPoint={setSnap}
-      // Bottom sheet, not modal - section 8 requires the map stay visible and
+      // Bottom sheet, not modal - section 8 requires the map stay visible AND
       // interactive behind it.
+      //
+      // modal={false} alone is not enough. vaul still renders a full-screen
+      // overlay above the page and applies scroll locking, so every tap aimed
+      // at the map, the search pill or empty space was being swallowed - the
+      // app looked frozen with only the sheet responding.
+      //
+      // dismissible keeps drag-down-to-close; the overlay is simply never
+      // rendered, and the content below explicitly re-enables pointer events.
       modal={false}
+      dismissible
     >
       <Drawer.Portal>
         <Drawer.Content
-          className="bg-surface border-line fixed inset-x-0 bottom-0 z-30 mx-auto flex h-[96dvh] max-w-md flex-col rounded-t-2xl border-t outline-none md:right-auto md:left-4 md:w-[380px]"
+          className="bg-surface border-line pointer-events-auto fixed inset-x-0 bottom-0 z-30 mx-auto flex h-[96dvh] max-w-md flex-col rounded-t-2xl border-t outline-none md:right-auto md:left-4 md:w-[380px]"
           aria-describedby={undefined}
+          // Without this, vaul steals focus back into the sheet on every
+          // outside tap, which is what made the map unclickable even once the
+          // overlay was gone.
+          onInteractOutside={(e) => e.preventDefault()}
+          onPointerDownOutside={(e) => e.preventDefault()}
         >
           <div className="bg-line mx-auto mt-3 h-1 w-10 shrink-0 rounded-full" />
+
+          {/* Explicit close. Drag-to-dismiss is not discoverable, and on
+              desktop there is no obvious gesture at all. */}
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="text-text-dim hover:text-text absolute top-3 right-3 rounded-full p-1"
+          >
+            <X className="h-5 w-5" />
+          </button>
 
           <div className="flex-1 overflow-y-auto overscroll-contain px-4 pb-6">
             <div className="flex items-start justify-between gap-4 pt-3">
@@ -131,7 +161,49 @@ export function PlaceSheet({
             </p>
 
             <div className="mt-4">
-              {mode === "view" ? (
+              {confirmDelete ? (
+                <div className="border-line rounded-xl border p-4">
+                  <p className="text-text text-sm font-medium">
+                    Remove {place?.name}?
+                  </p>
+                  <p className="text-text-dim mt-2 text-sm">
+                    {confirmDelete.visitCount === 0
+                      ? "This place has no visits logged. The pin will be removed from your map."
+                      : `This will also permanently delete ${confirmDelete.visitCount} logged visit${
+                          confirmDelete.visitCount === 1 ? "" : "s"
+                        }, including any notes and photos. This cannot be undone.`}
+                  </p>
+                  <div className="mt-4 flex gap-2">
+                    <button
+                      type="button"
+                      disabled={deleting}
+                      onClick={() => {
+                        if (!placeId) return
+                        setDeleting(true)
+                        startTransition(async () => {
+                          const r = await deletePlace(placeId)
+                          setDeleting(false)
+                          if (r.ok) {
+                            setConfirmDelete(null)
+                            onChanged()
+                            onClose()
+                          }
+                        })
+                      }}
+                      className="bg-r-low text-text flex-1 rounded-full px-4 py-2.5 text-sm font-medium disabled:opacity-50"
+                    >
+                      {deleting ? "Removing…" : "Yes, remove it"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmDelete(null)}
+                      className="border-line text-text-dim hover:text-text rounded-full border px-4 py-2.5 text-sm"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : mode === "view" ? (
                 <>
                   <button
                     type="button"
@@ -211,6 +283,21 @@ export function PlaceSheet({
                       </li>
                     ))}
                   </ul>
+
+                  {/* Remove the place entirely. Sits below the history rather
+                      than beside the title, so it is reachable but never the
+                      thing a thumb lands on by accident. */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!placeId) return
+                      getPlaceDeleteImpact(placeId).then(setConfirmDelete)
+                    }}
+                    className="border-line text-text-dim hover:text-r-low mt-6 flex w-full items-center justify-center gap-2 rounded-full border px-4 py-2.5 text-sm"
+                  >
+                    <MapPinOff className="h-4 w-4" />
+                    Remove this place
+                  </button>
                 </>
               ) : (
                 <VisitForm

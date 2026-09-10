@@ -87,3 +87,50 @@ export async function addPlace(input: AddPlaceInput): Promise<AddPlaceResult> {
   revalidatePath("/")
   return { ok: true, place: data as PlaceMarker, alreadyExisted: false }
 }
+
+// Deleting a place. The schema cascades: removing a place removes its visits,
+// and removing a visit removes its photo rows. That is correct - orphan visits
+// pointing at nothing would be worse - but it means this is destructive well
+// beyond the pin itself, so the UI must say so before asking.
+export async function deletePlace(
+  placeId: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: "Not signed in." }
+
+  // Scoped to user_id as well as id. RLS already enforces this, but a delete is
+  // irreversible and belt-and-braces is cheap here.
+  const { error } = await supabase
+    .from("places")
+    .delete()
+    .eq("id", placeId)
+    .eq("user_id", user.id)
+
+  if (error) return { ok: false, error: error.message }
+
+  revalidatePath("/")
+  return { ok: true }
+}
+
+// How much a delete would destroy, so the confirmation can be specific rather
+// than a generic "are you sure?".
+export async function getPlaceDeleteImpact(
+  placeId: string,
+): Promise<{ visitCount: number }> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { visitCount: 0 }
+
+  const { count } = await supabase
+    .from("visits")
+    .select("id", { count: "exact", head: true })
+    .eq("place_id", placeId)
+    .eq("user_id", user.id)
+
+  return { visitCount: count ?? 0 }
+}
