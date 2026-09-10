@@ -128,3 +128,70 @@
     @apply font-sans;
   }
 }
+/* ==========================================================================
+   Plate design tokens — plan.md section 8.
+
+   Tailwind v4 has no tailwind.config.ts theme block, so tokens are declared
+   here with @theme and become utilities automatically: --color-ink yields
+   bg-ink, text-ink, border-ink and so on.
+   ========================================================================== */
+
+@theme {
+  /* Surfaces. Deliberately a deep blue-green rather than black: a black
+     surround under a map reads as a dead screen, where the teal cast reads as
+     dusk. */
+  --color-ink: #0e1618;
+  --color-surface: #172427;
+  --color-surface-raised: #1f3034;
+  --color-line: #2c4247;
+  --color-text: #ede8e0;
+  --color-text-dim: #93a6a9;
+
+  /* The rating ramp. Runs the way food browns — pale and raw at the low end,
+     through ochre, to a dark chili red. The one place the app is loud. */
+  --color-r-none: #6e8489;
+  --color-r-low: #7e9298;
+  --color-r-mid: #c9973f;
+  --color-r-good: #d2542e;
+  --color-r-top: #a82a28;
+
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+
+  /* Scale from section 8: 12 / 14 / 16 / 20 / 28 / 56. The 56 is reserved for
+     the rating numeral in the bottom sheet and appears nowhere else. */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.75rem;
+  --text-rating: 3.5rem;
+}
+
+/* The map is full-bleed behind everything, so the document itself must not
+   scroll or bounce — otherwise iOS rubber-banding drags the map off the
+   viewport edge. */
+html,
+body {
+  overscroll-behavior: none;
+}
+
+/* Range thumb. Needs vendor pseudo-elements, which Tailwind cannot express. */
+.plate-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  background: var(--color-text);
+  border: 2px solid var(--color-ink);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.5);
+  cursor: grab;
+}
+.plate-range::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--color-ink);
+  border-radius: 9999px;
+  background: var(--color-text);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.5);
+  cursor: grab;
+}
