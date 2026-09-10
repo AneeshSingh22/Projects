@@ -138,11 +138,38 @@ npm was two major versions behind what this Node install expects, which caused
 package downloads to fail outright. Upgrading fixed it. If installs start failing
 strangely again, check the npm version first.
 
-### Still outstanding at the end of this phase
+### Phase 0 acceptance: met
 
-- The schema has not been run against the database yet.
-- No GitHub repo and no Vercel deploy, so the acceptance test — open the URL on
-  your phone and sign in — has been met locally but not in production.
+Live at https://plate-restaurant-tracker.vercel.app — signed in on an iPhone,
+launched from a home-screen icon. That last detail is the one worth noting: it is
+exactly the scenario that would have failed with a magic link, so the password
+decision was validated by the acceptance test rather than only argued for.
+
+Verified rather than assumed, before declaring the phase done:
+
+- All three tables exist (queried directly with the secret key).
+- The `visit-photos` bucket exists and is private.
+- Security rules genuinely deny. An anonymous insert was rejected with
+  `42501 new row violates row-level security policy`. Reading an empty table
+  proves nothing, so the check was a write.
+- No credentials in any commit. Every commit and blob was scanned for key
+  patterns before the first public push.
+
+### One deliberate gap
+
+The Maps API key is restricted to `localhost:3000` and the production domain
+only. Preview deployments will not render a map.
+
+Google will not accept a wildcard in the middle of a hostname, so covering
+previews meant allowing `https://*.vercel.app/*` — every site on vercel.app,
+not just ours. That was judged not worth it. A `NEXT_PUBLIC_` key ships in the
+browser bundle and is readable by anyone regardless, and the Referer header is
+trivially forged, so the referrer list was never the real protection. The daily
+quota caps are. Worst case from a leaked key is an exhausted daily quota, not a
+bill.
+
+If a preview ever needs a working map, the fix is to add that preview's exact
+URL rather than to widen the pattern.
 
 ### How this repo reaches GitHub
 
@@ -163,3 +190,270 @@ because the commit history is meant to be readable as the build story.
 The tradeoff accepted here: two checkouts and one extra command per phase, in
 exchange for the project sitting where the other work sits. A standalone repo
 would have made this a plain `git push`.
+
+---
+
+## Phase 1 — The map, mounted once
+
+### What got built
+
+A full-screen Google map, centred on Shaw, DC, with the app's own header
+floating on top of it. That is all you can see. The work in this phase is almost
+entirely about a rule that is invisible when it is working.
+
+### The rule this phase exists to enforce
+
+Google charges per map *initialisation*, not per page view or per pan. A React
+component that rebuilds the map every time something changes on screen can fire
+thousands of billable loads in one afternoon of clicking around. The free
+allowance is 10,000 a month. This is the single realistic way this project ever
+generates a bill.
+
+So the map is created once when the app opens and is never rebuilt. Everything
+else — the search bar coming in next phase, the sliding sheet after that — is
+layered *beside* it rather than wrapped *around* it. Anything that wraps the map
+can rebuild it; anything beside it cannot. That is the whole architecture, and it
+is why the page is structured the way it is even though it currently holds almost
+nothing.
+
+### The counter that proves it
+
+There is a counter in the code, visible only during development, that prints
+`[MAP MOUNT] count = 1` to the browser console. If it ever prints 2, something
+has started rebuilding the map and it needs fixing before anything else.
+
+**This was rewritten rather than taken from the plan.** The original counted how
+many times a React component appeared. That number is wrong in two ordinary
+situations: React deliberately runs setup twice during development as a
+correctness check, so it read 2 immediately on a fresh load; and it remembered
+its count across page refreshes, so refreshing showed 2, then 3, then 4 — even
+though each refresh is legitimately one new map.
+
+Both of those are false alarms, and a warning that fires when nothing is wrong
+gets ignored within a day. At that point it is worse than having no warning,
+because it creates the impression of a safety net that is not there.
+
+What costs money is how many maps get built, so that is what is counted now, by
+tracking the map objects themselves rather than the React components around them.
+Development-mode double-runs and moving between pages correctly report 1. A real
+rebuild reports 2 and prints a loud error naming the likely causes. A full page
+refresh goes back to 1, which is correct, because a refresh genuinely is one new
+map.
+
+### Other decisions
+
+**Design tokens moved to CSS.** The plan put the colour palette in a Tailwind
+config file. Tailwind version 4, which this project uses, no longer has that
+file. Same palette, different location.
+
+**Two fonts, loaded at build time rather than fetched from Google.** Both are
+downloaded and bundled during the build, so the app makes no request to Google
+Fonts when someone opens it. Fraunces is loaded with its optical-size axis
+available, which matters for the oversized rating numeral in Phase 3 — type
+designed for large display sizes is drawn differently from type meant for body
+text, and using the wrong cut at 56px looks subtly clumsy.
+
+**The map ignores React for panning.** The map is told where to start, not where
+to be. Continuously telling it where to be would turn every drag into a
+re-render and fight the user's own gestures.
+
+### Known incomplete
+
+**The map style is not applied.** The plan calls for a dark, desaturated map with
+only restaurant labels showing. That style is configured in the Google Cloud
+console against the Map ID, not in this codebase, and it has not taken effect
+yet. The map currently renders in default Google colours.
+
+This is cosmetic and deliberately deferred. It changes no code, needs no rebuild,
+and can be applied at any time. Worth knowing: the palette in the plan was chosen
+against a dark map, so if the map stays light, the rating colours will need
+deepening to stay legible. That is a Phase 3 concern.
+
+---
+
+## Phase 2 — Search, add, and pins
+
+### What got built
+
+Three ways to get a restaurant onto the map: search for it by name, tap a
+restaurant label Google already draws on the map, or long-press an empty spot
+and name it yourself. Everything added shows as a pin, and the pins come from
+your own database rather than from Google.
+
+### The cost rules this phase had to obey
+
+This is the phase where the app starts talking to Google's paid APIs, so the
+money constraint stops being theoretical.
+
+**Searching is billed by session, not by keystroke.** Type "daikaya" and that is
+seven requests. Google's pricing forgives all of them *if* they carry a shared
+session token and the session is closed by looking up the place you picked. Then
+you pay for one lookup instead of seven searches.
+
+The trap is that a token is single-use. Reuse one after its session closed and
+billing silently reverts to per-keystroke — silently, with no error and no
+warning, the invoice just changes. Because the failure is invisible, the token
+lifecycle lives in one small file of its own rather than being spread through
+the interface code, so it can be checked in one place.
+
+Searching is also delayed by a quarter second after you stop typing, so a
+five-letter word is one request rather than five.
+
+**Only cheap fields are ever requested.** Google splits place data into tiers.
+Name, address, coordinates and category are the cheap tier, with an allowance
+roughly ten times the expensive one. Photos, reviews and ratings are the
+expensive tier. The code requests the cheap set explicitly and never the
+expensive one. This was tested against the live API rather than assumed.
+
+**Once a place is saved, Google is never asked about it again.** The map draws
+entirely from your own database. Adding somewhere already on your map returns
+what is already there instead of asking Google a second time.
+
+**No "search this area" button, ever.** That feature would call the most
+expensive endpoint on every map pan. The plan forbids it and so does this. The
+restaurant names already visible on the base map are free, because they are
+painted into the map images rather than fetched.
+
+### The thing that surprised me
+
+The plan described using Google's ready-made search box. That component was
+retired in March 2025, and the newer API this project is set up for does not
+offer it at all. The replacement is assembled by hand from two separate calls.
+
+Practical consequence: almost every tutorial and code sample online shows the
+retired approach. If this code ever needs changing and something found online
+looks much simpler, that is probably why — and it will not work against this
+project's setup.
+
+### Loading every place at once
+
+The plan called for asking the database only for places inside the current map
+view, refreshed as you pan. That was dropped in favour of loading everything
+once when the app opens.
+
+One person's restaurant list is a rounded-up tenth of a megabyte. Loading it
+once removes a network request from every pan, removes a whole class of bug
+where a fast pan lands results out of order, and means the offline support in a
+later phase is nearly free because the data is already there.
+
+The database still carries the indexes the original approach would have needed,
+so switching back later is a small change. The real limit is not the loading but
+how many pins a map can draw smoothly, which is somewhere in the thousands.
+
+### A bug worth remembering
+
+The long-press feature was first written by hand, using a timer to detect a
+held finger and some arithmetic to turn the touch position into a location.
+Both halves were wrong. React clears the event details before a timer fires, so
+it would never have triggered. And converting a screen position into a
+coordinate by simple proportion is inaccurate on a map, because map projections
+stretch north-south — close enough when zoomed into one street, badly wrong when
+zoomed out.
+
+Both problems disappeared by using the map's own built-in event, which reports
+the exact location directly. Worth remembering as a general lesson: the
+hand-rolled version was more code, and wrong in ways that would not have shown
+up until someone used it far from where it was tested.
+
+### Verified
+
+- Search found the intended restaurant through the new API.
+- A place lookup returned name, address, coordinates, category, city and
+  country, with no expensive-tier fields present.
+- A place saved and reloaded correctly.
+- The automatic "last modified" timestamp genuinely updates on edit — confirmed
+  by editing a live row and watching it change.
+- The map still initialises exactly once after adding search, selection, dialogs
+  and a growing set of pins. This is the check that matters most, and it was
+  confirmed by hand in the browser.
+
+---
+
+## Phase 3 — Logging a visit
+
+### What got built
+
+Tapping a pin slides up a panel from the bottom of the screen. It shows the
+place, its average rating as a large numeral, and every visit logged there.
+From it you can log a new visit, edit an old one, delete one, or remove the
+place entirely.
+
+The panel drags between three heights: a peek showing just the name and score,
+a half height, and nearly full screen for the whole history. The map stays
+visible and usable behind it the entire time. It is a sheet, not a dialog.
+
+### The rating colours were changed from the plan
+
+The plan specified a scale running pale, through ochre, to a dark chili red,
+with red as the highest rating. Themed on the way food browns.
+
+It was replaced with muted grey, through amber, to green.
+
+The reason is what the map is actually for. Red is the loudest colour
+available, and the original scale spent it on places that were merely good,
+while a bad place and a great one both read as broadly warm. When the map is
+being scanned for somewhere to eat, that is backwards. Now a poor rating
+recedes into grey and stays quiet, and the best places are the only strongly
+saturated things on screen.
+
+The greens are deliberately deep and slightly dulled rather than a bright
+signal green, because maps are already full of green for parks, and pins must
+not be mistaken for landmarks.
+
+What was kept from the plan: one continuous scale rather than a handful of
+fixed brackets, so a 7.5 sits visibly between a 7 and an 8, and the scale
+remains the loudest thing in the app.
+
+### A bug worth recording
+
+Pins were originally coloured by whether a place had been visited, not by how
+good it was. So a restaurant rated 0.5 and one rated 10 looked identical. The
+colour scale existed but carried no information.
+
+Fixed by working out each place's average rating when the map loads and
+colouring from that. Pins now also show the number itself, so the map can be
+read without opening anything.
+
+The general lesson: the scale was correct and tested in isolation, and the
+component that used it simply never passed it the rating. Testing the piece is
+not the same as testing that it is wired up.
+
+### The panel froze the rest of the app
+
+On first build, opening the panel made everything else unresponsive. The map
+would not drag, search could not be reached, and there was no way back out.
+
+The panel library was told not to behave as a dialog, but that setting alone
+does not stop it covering the screen with an invisible layer that absorbs every
+tap. The layer had to be disabled explicitly.
+
+An explicit close button was added at the same time. Dragging the panel down to
+dismiss it works, but there is nothing on screen that suggests it, and on a
+computer there is no equivalent gesture at all.
+
+### Deleting a place asks a specific question
+
+The database is set up so that removing a place also removes its visits, and
+removing a visit also removes its photos. That is deliberate - a visit
+belonging to a restaurant that no longer exists would be worse.
+
+But it means deleting a pin can destroy years of notes. So the confirmation
+says exactly what will be lost, naming the number of visits, rather than asking
+a generic "are you sure?". The plan's whole argument is that the visit history
+is the point of the app, and a vague prompt would not respect that.
+
+### Other decisions
+
+**The rating slider is a standard browser control**, not a custom one. It gets
+keyboard support, screen-reader support and the phone's own drag feel for free.
+The coloured track is the only part that is bespoke.
+
+**The one animation in the app** is the big rating number counting up when the
+panel opens. It is skipped entirely, not merely shortened, for anyone whose
+system asks for reduced motion.
+
+**Logging a visit only promotes a place from "want to try" to "visited".** If
+somewhere had been deliberately marked a favourite, or as somewhere to avoid,
+logging a meal will not quietly undo that.
+
+**Visits are never overwritten.** Four meals is four records.
