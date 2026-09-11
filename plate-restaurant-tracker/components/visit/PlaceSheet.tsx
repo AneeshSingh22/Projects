@@ -5,7 +5,8 @@ import { Drawer } from "vaul"
 import { Pencil, Trash2, Plus, X, MapPinOff } from "lucide-react"
 import { getPlaceDetail } from "@/app/actions/place-detail"
 import { deleteVisit } from "@/app/actions/visits"
-import { deletePlace, getPlaceDeleteImpact } from "@/app/actions/places"
+import { deletePlace, getPlaceDeleteImpact, updatePlaceCategory } from "@/app/actions/places"
+import { CATEGORIES, CATEGORY_ORDER, type PlaceCategory } from "@/lib/categories"
 import { getSignedPhotos, type SignedPhoto } from "@/app/actions/photos"
 import { PhotoUpload } from "./PhotoUpload"
 import { PhotoStrip } from "./PhotoStrip"
@@ -205,6 +206,29 @@ export function PlaceSheet({
                     .filter(Boolean)
                     .join(" · ") || " "}
                 </p>
+                {/* The category is guessed from Google's place type, so it is
+                    an editable control rather than a label - no rule table gets
+                    every place right, and a wrong guess should cost one tap. */}
+                {place && (
+                  <select
+                    value={place.category}
+                    onChange={(e) => {
+                      const next = e.target.value as PlaceCategory
+                      startTransition(async () => {
+                        await updatePlaceCategory(place.id, next)
+                        onChanged()
+                      })
+                    }}
+                    aria-label="Category"
+                    className="bg-surface-raised border-line text-text-dim mt-2 rounded-full border px-2 py-1 text-xs"
+                  >
+                    {CATEGORY_ORDER.map((c) => (
+                      <option key={c} value={c}>
+                        {CATEGORIES[c].label}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
               <span
                 className="font-display shrink-0 leading-none tabular-nums"
@@ -294,9 +318,9 @@ export function PlaceSheet({
                             <span className="text-text-dim text-xs">
                               {formatDate(v.visited_on)}
                             </span>
-                            {v.dishes?.length ? (
+                            {(v.dishes?.length || v.activity?.length) ? (
                               <p className="text-text mt-1 text-sm">
-                                {v.dishes.join(", ")}
+                                {[...(v.dishes ?? []), ...(v.activity ?? [])].join(", ")}
                               </p>
                             ) : null}
                             {v.companions?.length ? (
@@ -378,6 +402,7 @@ export function PlaceSheet({
               ) : (
                 <VisitForm
                   placeId={placeId!}
+                  category={place?.category ?? "other"}
                   existing={typeof mode === "object" ? mode.edit : undefined}
                   onSaved={() => {
                     setMode("view")

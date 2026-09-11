@@ -22,7 +22,7 @@ export async function getPlaceDetail(
   const { data: place, error } = await supabase
     .from("places")
     .select(
-      "id, name, lat, lng, status, cuisine, google_place_id, address, city, notes",
+      "id, name, lat, lng, status, category, cuisine, google_place_id, address, city, notes",
     )
     .eq("id", placeId)
     .eq("user_id", user.id)

@@ -10,6 +10,7 @@ export type VisitInput = {
   rating: number | null
   notes: string | null
   dishes: string[]
+  activity: string[]
   companions: string[]
   pricePaid: number | null
   wouldReturn: boolean | null
@@ -53,6 +54,7 @@ export async function logVisit(input: VisitInput): Promise<VisitResult> {
       rating: input.rating,
       notes: input.notes,
       dishes: input.dishes.length ? input.dishes : null,
+      activity: input.activity.length ? input.activity : null,
       companions: input.companions.length ? input.companions : null,
       price_paid: input.pricePaid,
       would_return: input.wouldReturn,
@@ -103,6 +105,7 @@ export async function updateVisit(
       rating: input.rating,
       notes: input.notes,
       dishes: input.dishes.length ? input.dishes : null,
+      activity: input.activity.length ? input.activity : null,
       companions: input.companions.length ? input.companions : null,
       price_paid: input.pricePaid,
       would_return: input.wouldReturn,

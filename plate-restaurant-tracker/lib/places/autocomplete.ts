@@ -1,6 +1,7 @@
 "use client"
 
 import { beginSession, endSession, currentSession } from "./session"
+import { ALL_SEARCH_TYPES } from "@/lib/categories"
 
 // Places API (New). HANDOFF 5a item 3.
 //
@@ -24,7 +25,13 @@ export type Suggestion = {
 const BIAS_CENTER = { lat: 38.9126, lng: -77.0219 }
 const BIAS_RADIUS_M = 30_000
 
-export async function fetchSuggestions(input: string): Promise<Suggestion[]> {
+export async function fetchSuggestions(
+  input: string,
+  // Narrowing to a category's own types when a filter is active, otherwise
+  // searching everything. Passing types does not change the SKU - it only
+  // changes which results come back - so this costs nothing.
+  includedPrimaryTypes: string[] = ALL_SEARCH_TYPES,
+): Promise<Suggestion[]> {
   const trimmed = input.trim()
   if (!trimmed) return []
 
@@ -44,7 +51,11 @@ export async function fetchSuggestions(input: string): Promise<Suggestion[]> {
       },
       // Restaurants and food places only. Narrowing here means fewer irrelevant
       // results, not a different SKU.
-      includedPrimaryTypes: ["restaurant", "cafe", "bar", "bakery"],
+      // Google rejects a request with too many types, and an empty list means
+      // "no restriction", which is what we want when searching everything.
+      ...(includedPrimaryTypes.length > 0 && includedPrimaryTypes.length <= 5
+        ? { includedPrimaryTypes }
+        : {}),
     })
 
   return (suggestions ?? [])
