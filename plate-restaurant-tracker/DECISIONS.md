@@ -191,6 +191,16 @@ The tradeoff accepted here: two checkouts and one extra command per phase, in
 exchange for the project sitting where the other work sits. A standalone repo
 would have made this a plain `git push`.
 
+**This tradeoff bit immediately.** Phases 1 through 4 were all committed locally
+and none of them were ever synced, so the live site served the Phase 0 build for
+days while four phases of work sat on one machine. It surfaced only when the app
+was opened on a phone and appeared broken.
+
+The lesson is that a manual step at the end of a long task is a step that gets
+skipped. The fix is to treat syncing as part of finishing a phase rather than as
+a separate chore: nothing counts as done until it is live, because the whole
+point of deploying is that the app is usable from a phone outside a restaurant.
+
 ---
 
 ## Phase 1 — The map, mounted once
