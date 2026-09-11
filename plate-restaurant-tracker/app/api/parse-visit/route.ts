@@ -24,6 +24,7 @@ const RESPONSE_SCHEMA = {
     visitedOn: { type: "STRING" },
     rating: { type: "NUMBER" },
     dishes: { type: "ARRAY", items: { type: "STRING" } },
+    activity: { type: "ARRAY", items: { type: "STRING" } },
     companions: { type: "ARRAY", items: { type: "STRING" } },
     pricePaid: { type: "NUMBER" },
     wouldReturn: { type: "BOOLEAN" },
@@ -37,6 +38,7 @@ export type ParsedVisit = {
   visitedOn?: string
   rating?: number
   dishes?: string[]
+  activity?: string[]
   companions?: string[]
   pricePaid?: number
   wouldReturn?: boolean
@@ -99,12 +101,16 @@ export async function POST(request: NextRequest) {
           parts: [
             {
               text:
-                `Extract restaurant visit details from the user's note. ` +
+                `Extract details of a visit to a place from the user's note. ` +
+                `The place may be a restaurant, a venue, a court or gym, a park, ` +
+                `or anything else - do not assume it is a meal. ` +
                 `Today is ${todayISO(tzOffset)}. ` +
                 `Dates must be YYYY-MM-DD; resolve relative dates like "last Friday" against today. ` +
                 `Rating is out of 10. ` +
                 `Omit any field the note does not mention - do not invent values. ` +
-                `Put anything descriptive that is not a dish, companion, price or rating into notes.`,
+                `dishes is for food ordered; activity is for what was done ` +
+                `somewhere that is not a restaurant. Use one or the other, not both. ` +
+                `Put anything descriptive that does not fit a field into notes.`,
             },
           ],
         },

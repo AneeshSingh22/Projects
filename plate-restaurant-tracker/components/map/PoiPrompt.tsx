@@ -4,6 +4,7 @@ import { useEffect, useState, useTransition } from "react"
 import { fetchPlaceDetails } from "@/lib/places/autocomplete"
 import { addPlace } from "@/app/actions/places"
 import type { PlaceMarker } from "@/types/db"
+import { CATEGORIES, categoryFromGoogleType } from "@/lib/categories"
 
 export type PoiCandidate = { placeId: string; lat: number; lng: number }
 
@@ -26,6 +27,7 @@ export function PoiPrompt({
     placeId: string
     name: string
     address: string | null
+    primaryType: string | null
   } | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
@@ -43,7 +45,12 @@ export function PoiPrompt({
           setError("Could not read that place.")
           return
         }
-        setDetails({ placeId: candidate.placeId, name: d.name, address: d.address })
+        setDetails({
+          placeId: candidate.placeId,
+          name: d.name,
+          address: d.address,
+          primaryType: d.primaryType,
+        })
       })
       .catch((e) => {
         if (!cancelled) setError(e instanceof Error ? e.message : "Lookup failed.")
@@ -89,6 +96,11 @@ export function PoiPrompt({
   const name = current?.name ?? null
   const address = current?.address ?? null
 
+  // The category is already known here, so the action can say the right thing
+  // rather than something generic. "I ate here" on a rec centre reads as a bug.
+  const category = categoryFromGoogleType(current?.primaryType)
+  const meta = CATEGORIES[category]
+
   return (
     <div className="pointer-events-auto absolute inset-x-0 bottom-0 z-20 p-4">
       <div className="bg-surface border-line mx-auto max-w-md rounded-2xl border p-4 shadow-2xl">
@@ -112,7 +124,7 @@ export function PoiPrompt({
             disabled={pending || !name}
             className="bg-r-good text-text w-full rounded-full px-4 py-2.5 text-sm font-medium disabled:opacity-50"
           >
-            {pending ? "Adding…" : "I ate here — log a visit"}
+            {pending ? "Adding…" : `${meta.visitedVerb} — log a visit`}
           </button>
           <div className="flex gap-2">
             <button

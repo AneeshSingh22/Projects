@@ -131,7 +131,7 @@ export function SearchPill({
             beginSession()
             setOpen(true)
           }}
-          placeholder="Search a restaurant"
+          placeholder="Search a place"
           className="text-text placeholder:text-text-dim w-full bg-transparent text-base outline-none"
           autoComplete="off"
           enterKeyHint="search"
