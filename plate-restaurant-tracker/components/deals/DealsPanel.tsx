@@ -80,10 +80,10 @@ export function DealsPanel({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="bg-surface/95 border-line text-text hover:border-line-strong pointer-events-auto flex items-center gap-2.5 rounded-full border px-5 py-3.5 text-sm backdrop-blur-xl transition-all"
+        className="bg-surface/95 border-line text-text hover:border-line-strong pointer-events-auto flex items-center gap-2 rounded-full border px-4 py-3 text-sm backdrop-blur-xl transition-all sm:gap-2.5 sm:px-6 sm:py-4 sm:text-base"
         style={{ boxShadow: "var(--shadow-panel)" }}
       >
-        <Tag className="h-5 w-5" />
+        <Tag className="h-5 w-5 sm:h-[22px] sm:w-[22px]" />
         Deals
         {liveCount > 0 && (
           <span className="bg-accent flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-semibold text-white">
