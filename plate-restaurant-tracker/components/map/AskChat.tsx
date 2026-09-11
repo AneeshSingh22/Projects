@@ -106,10 +106,10 @@ export function AskChat({
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Ask about your places"
-        className="bg-accent hover:bg-accent-hover pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full text-white transition-all duration-200 ease-out active:scale-95"
+        className="bg-accent hover:bg-accent-hover pointer-events-auto flex h-[86px] w-[86px] items-center justify-center rounded-full text-white transition-all duration-200 ease-out active:scale-95"
         style={{ boxShadow: "var(--shadow-float)" }}
       >
-        <Sparkles className="h-5 w-5" />
+        <Sparkles className="h-8 w-8" />
       </button>
     )
   }
