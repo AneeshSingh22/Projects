@@ -45,7 +45,7 @@ export function CategoryPanel({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="bg-surface/95 border-line text-text hover:border-line-strong pointer-events-auto rounded-full border px-3.5 py-2 text-xs backdrop-blur-xl transition-all"
+        className="bg-surface/95 border-line text-text hover:border-line-strong pointer-events-auto rounded-full border px-5 py-3.5 text-sm backdrop-blur-xl transition-all"
         style={{ boxShadow: "var(--shadow-panel)" }}
       >
         {total} place{total === 1 ? "" : "s"}

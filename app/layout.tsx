@@ -31,10 +31,8 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  // Matches --color-surface. The palette moved from dark to light, and a
-  // leftover dark status bar would read as a stray black stripe above a light
-  // app.
-  themeColor: "#fffcf8",
+  // Matches --color-ink, so the iOS status bar blends into the app chrome.
+  themeColor: "#0e1618",
   // The map is full-bleed; letting the user zoom the document would let them
   // pinch the UI chrome off screen.
   maximumScale: 1,
