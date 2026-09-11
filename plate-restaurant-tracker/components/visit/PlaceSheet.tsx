@@ -2,11 +2,15 @@
 
 import { useEffect, useState, useTransition } from "react"
 import { Drawer } from "vaul"
-import { Pencil, Trash2, Plus, X, MapPinOff } from "lucide-react"
+import { Pencil, Trash2, Plus, X, MapPinOff, Tag } from "lucide-react"
 import { getPlaceDetail } from "@/app/actions/place-detail"
 import { deleteVisit } from "@/app/actions/visits"
 import { deletePlace, getPlaceDeleteImpact, updatePlaceCategory } from "@/app/actions/places"
 import { CATEGORIES, CATEGORY_ORDER, type PlaceCategory } from "@/lib/categories"
+import { getDealsForPlace, deleteDeal } from "@/app/actions/deals"
+import { DealForm } from "@/components/deals/DealForm"
+import { describeDays, describeWindow } from "@/lib/deals/active"
+import type { Deal } from "@/types/db"
 import { getSignedPhotos, type SignedPhoto } from "@/app/actions/photos"
 import { PhotoUpload } from "./PhotoUpload"
 import { PhotoStrip } from "./PhotoStrip"
@@ -54,6 +58,8 @@ export function PlaceSheet({
   // Photos for every visit on this place, signed in one batch when the sheet
   // opens rather than one request per thumbnail (HANDOFF 5a item 7).
   const [photos, setPhotos] = useState<Record<string, SignedPhoto[]>>({})
+  const [deals, setDeals] = useState<Deal[]>([])
+  const [addingDeal, setAddingDeal] = useState(false)
 
   const placeId = place?.id ?? null
 
@@ -103,9 +109,21 @@ export function PlaceSheet({
     }
   }, [visitIds])
 
+  useEffect(() => {
+    if (!placeId) return
+    let cancelled = false
+    getDealsForPlace(placeId).then((d) => {
+      if (!cancelled) setDeals(d)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [placeId])
+
   function reload() {
     if (!placeId) return
     getPlaceDetail(placeId).then(setDetail)
+    getDealsForPlace(placeId).then(setDeals)
     onChanged()
   }
 
@@ -299,6 +317,58 @@ export function PlaceSheet({
                 </div>
               ) : mode === "view" ? (
                 <>
+                  {/* Deals you have seen here. Above the log button because
+                      standing outside deciding whether to go in is when this
+                      matters, and that happens before you eat. */}
+                  {(deals.length > 0 || addingDeal) && (
+                    <div className="mb-4">
+                      {addingDeal ? (
+                        <DealForm
+                          placeId={placeId!}
+                          onSaved={() => {
+                            setAddingDeal(false)
+                            reload()
+                          }}
+                          onCancel={() => setAddingDeal(false)}
+                        />
+                      ) : (
+                        <ul className="space-y-2">
+                          {deals.map((d) => (
+                            <li
+                              key={d.id}
+                              className="border-line bg-surface-raised/40 flex items-start justify-between gap-2 rounded-xl border px-3 py-2.5"
+                            >
+                              <span className="min-w-0">
+                                <span className="text-text block text-sm">
+                                  {d.description}
+                                </span>
+                                <span className="text-text-dim block text-xs">
+                                  {describeDays(d.days)}
+                                  {describeWindow(d.starts_at, d.ends_at)
+                                    ? ` · ${describeWindow(d.starts_at, d.ends_at)}`
+                                    : ""}
+                                </span>
+                              </span>
+                              <button
+                                type="button"
+                                aria-label="Delete deal"
+                                onClick={() => {
+                                  startTransition(async () => {
+                                    await deleteDeal(d.id)
+                                    reload()
+                                  })
+                                }}
+                                className="text-text-dim hover:text-accent shrink-0"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  )}
+
                   <button
                     type="button"
                     onClick={() => {
@@ -388,6 +458,20 @@ export function PlaceSheet({
                   {/* Remove the place entirely. Sits below the history rather
                       than beside the title, so it is reachable but never the
                       thing a thumb lands on by accident. */}
+                  {!addingDeal && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAddingDeal(true)
+                        setSnap(SNAP_POINTS[2])
+                      }}
+                      className="border-line text-text-dim hover:text-text hover:border-line-strong mt-4 flex w-full items-center justify-center gap-2 rounded-full border px-4 py-2.5 text-sm transition-colors"
+                    >
+                      <Tag className="h-4 w-4" />
+                      Add a deal
+                    </button>
+                  )}
+
                   <button
                     type="button"
                     onClick={() => {

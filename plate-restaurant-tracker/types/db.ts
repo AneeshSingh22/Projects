@@ -74,3 +74,22 @@ export type PlaceDetail = PlaceMarker & {
   avgRating: number | null
   lastVisitedOn: string | null
 }
+
+export type Deal = {
+  id: string
+  place_id: string
+  user_id: string
+  description: string
+  days: number[] | null
+  starts_at: string | null
+  ends_at: string | null
+  expires_on: string | null
+  notes: string | null
+  created_at: string
+  updated_at: string
+}
+
+// A deal joined to enough of its place to render a row without a second query.
+export type DealWithPlace = Deal & {
+  place: Pick<Place, "id" | "name" | "lat" | "lng" | "category">
+}
