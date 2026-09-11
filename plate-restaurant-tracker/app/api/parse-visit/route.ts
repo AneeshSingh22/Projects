@@ -6,14 +6,28 @@ import { createClient } from "@/lib/supabase/server"
 // GEMINI_API_KEY is server-only and never reaches the browser, which is why
 // this is a route rather than a client call (section 4.4).
 //
-// Model choice: plan.md section 3 says "Gemini 3 Flash". The key's model list
-// offers gemini-3-flash-preview, but preview models get retired.
-// gemini-flash-latest is a stable alias that resolves to the current flash
-// model and produced identical output on the plan's own example sentence, so
-// it is used instead. gemini-3.8-flash was also tried and returned 503 "high
-// demand" - a good illustration of why the fallback below is mandatory.
-const MODEL = "gemini-flash-latest"
-const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`
+// Model choice, revised after testing rather than from the docs.
+//
+// plan.md section 3 says "Gemini 3 Flash". The first attempt here used
+// gemini-flash-latest, reasoning that a stable alias outlives a preview model.
+// Sound reasoning, wrong conclusion: that alias failed to connect on every
+// attempt while two concrete model names succeeded on every attempt.
+//
+// Testing also found gemini-2.5-flash returning 404 "no longer available" -
+// a model that was listed as available days earlier. Model names on this API
+// come and go, which is the real lesson.
+//
+// So: a list, tried in order, rather than a single name. If the first has been
+// retired or is overloaded, the next is tried. Only after all of them fail does
+// the caller fall back to the manual form.
+const MODELS = [
+  "gemini-3-flash-preview",
+  "gemini-3.5-flash",
+  "gemini-3.1-flash-lite",
+]
+
+const endpointFor = (model: string) =>
+  `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`
 
 // Plain fetch, no SDK. HANDOFF 5b: @google/genai was declined because one call
 // site does not justify a dependency, and this is about thirty lines.
@@ -82,20 +96,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, error: "empty" }, { status: 200 })
   }
 
-  try {
-    // Aborted rather than left hanging: section 9 says the app must never block
-    // on Gemini, and a request with no timeout is exactly how that happens.
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 12_000)
+  // Shared across attempts so the whole operation is bounded, not each try.
+  // Section 9: the app must never block on Gemini.
+  const deadline = Date.now() + 12_000
 
-    const res = await fetch(ENDPOINT, {
-      method: "POST",
-      signal: controller.signal,
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": apiKey,
-      },
-      body: JSON.stringify({
+  const requestBody = JSON.stringify({
         contents: [{ parts: [{ text }] }],
         systemInstruction: {
           parts: [
@@ -121,28 +126,49 @@ export async function POST(request: NextRequest) {
           // should always yield the same fields.
           temperature: 0,
         },
-      }),
-    })
+  })
 
-    clearTimeout(timeout)
+  for (const model of MODELS) {
+    const remaining = deadline - Date.now()
+    if (remaining <= 500) break
 
-    if (!res.ok) {
-      // Rate limits and 503s are expected and routine on the free tier. The
-      // client falls back to the empty manual form.
-      return NextResponse.json({ ok: false, error: "unavailable" }, { status: 200 })
+    try {
+      const controller = new AbortController()
+      const timer = setTimeout(() => controller.abort(), remaining)
+
+      const res = await fetch(endpointFor(model), {
+        method: "POST",
+        signal: controller.signal,
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": apiKey,
+        },
+        body: requestBody,
+      })
+
+      clearTimeout(timer)
+
+      // 404 means the model was retired; 503 means it is overloaded. Both are
+      // worth trying the next model for. A 400 means our request is wrong, and
+      // retrying it against another model would fail identically.
+      if (!res.ok) {
+        if (res.status === 400 || res.status === 401 || res.status === 403) break
+        continue
+      }
+
+      const data = await res.json()
+      const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text
+      if (typeof raw !== "string") continue
+
+      return NextResponse.json({ ok: true, parsed: JSON.parse(raw) as ParsedVisit })
+    } catch {
+      // Timeout or network failure on this model. Try the next one if there is
+      // time left on the shared deadline.
+      continue
     }
-
-    const data = await res.json()
-    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text
-    if (typeof raw !== "string") {
-      return NextResponse.json({ ok: false, error: "unavailable" }, { status: 200 })
-    }
-
-    const parsed = JSON.parse(raw) as ParsedVisit
-    return NextResponse.json({ ok: true, parsed })
-  } catch {
-    // Timeout, network failure, or malformed JSON all land here and all mean
-    // the same thing to the user: fill the form in yourself.
-    return NextResponse.json({ ok: false, error: "unavailable" }, { status: 200 })
   }
+
+  // Every model failed. The client falls back to the empty manual form with
+  // the user's typed text preserved in notes.
+  return NextResponse.json({ ok: false, error: "unavailable" }, { status: 200 })
 }
