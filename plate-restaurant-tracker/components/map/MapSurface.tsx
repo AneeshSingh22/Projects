@@ -56,16 +56,28 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
     setPlaces(fresh)
   }, [])
 
+  // When true, the sheet opens straight into the visit form rather than the
+  // history view. Set by the "I ate here" path so adding a place and recording
+  // the meal is one continuous action.
+  const [openToLog, setOpenToLog] = useState(false)
+
   const handleAdded = useCallback(
-    (place: PlaceMarker, alreadyExisted: boolean) => {
+    (place: PlaceMarker, alreadyExisted: boolean, thenLog = false) => {
       setPlaces((prev) =>
         prev.some((p) => p.id === place.id) ? prev : [place, ...prev],
       )
       setSelectedId(place.id)
-      setToast(
-        alreadyExisted ? `${place.name} is already on your map` : `Added ${place.name}`,
-      )
-      setTimeout(() => setToast(null), 2600)
+      setOpenToLog(thenLog)
+      // No toast when going straight to the form - the sheet opening is
+      // feedback enough, and a toast would cover the fields.
+      if (!thenLog) {
+        setToast(
+          alreadyExisted
+            ? `${place.name} is already on your map`
+            : `Added ${place.name}`,
+        )
+        setTimeout(() => setToast(null), 2600)
+      }
     },
     [],
   )
@@ -86,7 +98,10 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
 
       const existing = places.find((p) => p.google_place_id === placeId)
       if (existing) {
+        // Already on the map: open its sheet rather than offering to add it
+        // again. The sheet's own "Log a visit" button is right there.
         setSelectedId(existing.id)
+        setOpenToLog(false)
         setPoi(null)
         return
       }
@@ -126,6 +141,7 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
             selected={p.id === selectedId}
             onSelect={(pl) => {
               setSelectedId(pl.id)
+              setOpenToLog(false)
               setPoi(null)
             }}
           />
@@ -160,7 +176,11 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
           touched, which is what keeps the mount count at 1. */}
       <PlaceSheet
         place={selected}
-        onClose={() => setSelectedId(null)}
+        openToLog={openToLog}
+        onClose={() => {
+          setSelectedId(null)
+          setOpenToLog(false)
+        }}
         onChanged={refreshPlaces}
       />
 
