@@ -19,7 +19,7 @@ export function PoiPrompt({
   onDismiss,
 }: {
   candidate: PoiCandidate
-  onAdded: (place: PlaceMarker, alreadyExisted: boolean) => void
+  onAdded: (place: PlaceMarker, alreadyExisted: boolean, thenLog?: boolean) => void
   onDismiss: () => void
 }) {
   const [details, setDetails] = useState<{
@@ -54,7 +54,11 @@ export function PoiPrompt({
     }
   }, [candidate.placeId])
 
-  function add() {
+  // thenLog carries the user's intent through the add. Tapping a restaurant on
+  // the map and then having to find its pin again to record the meal was a
+  // dead end - "I just ate here" is the most likely reason to tap a place at
+  // all, so it gets its own button rather than being a second step.
+  function add(thenLog: boolean) {
     startTransition(async () => {
       const d = await fetchPlaceDetails(candidate.placeId)
       if (!d) {
@@ -75,7 +79,7 @@ export function PoiPrompt({
         setError(result.error)
         return
       }
-      onAdded(result.place, result.alreadyExisted)
+      onAdded(result.place, result.alreadyExisted, thenLog)
       onDismiss()
     })
   }
@@ -101,22 +105,32 @@ export function PoiPrompt({
           </>
         )}
 
-        <div className="mt-4 flex gap-2">
+        <div className="mt-4 space-y-2">
           <button
             type="button"
-            onClick={add}
+            onClick={() => add(true)}
             disabled={pending || !name}
-            className="bg-r-good text-text flex-1 rounded-full px-4 py-2.5 text-sm font-medium disabled:opacity-50"
+            className="bg-r-good text-text w-full rounded-full px-4 py-2.5 text-sm font-medium disabled:opacity-50"
           >
-            {pending ? "Adding…" : "Add to wishlist"}
+            {pending ? "Adding…" : "I ate here — log a visit"}
           </button>
-          <button
-            type="button"
-            onClick={onDismiss}
-            className="border-line text-text-dim hover:text-text rounded-full border px-4 py-2.5 text-sm"
-          >
-            Dismiss
-          </button>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => add(false)}
+              disabled={pending || !name}
+              className="border-line text-text hover:bg-surface-raised flex-1 rounded-full border px-4 py-2.5 text-sm disabled:opacity-50"
+            >
+              Add to wishlist
+            </button>
+            <button
+              type="button"
+              onClick={onDismiss}
+              className="border-line text-text-dim hover:text-text rounded-full border px-4 py-2.5 text-sm"
+            >
+              Dismiss
+            </button>
+          </div>
         </div>
       </div>
     </div>

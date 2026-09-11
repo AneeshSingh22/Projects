@@ -18,14 +18,14 @@ export function CustomPinPrompt({
   onDismiss,
 }: {
   candidate: PinCandidate
-  onAdded: (place: PlaceMarker, alreadyExisted: boolean) => void
+  onAdded: (place: PlaceMarker, alreadyExisted: boolean, thenLog?: boolean) => void
   onDismiss: () => void
 }) {
   const [name, setName] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
 
-  function save() {
+  function save(thenLog: boolean) {
     const trimmed = name.trim()
     if (!trimmed) {
       setError("Give it a name.")
@@ -42,7 +42,7 @@ export function CustomPinPrompt({
         setError(result.error)
         return
       }
-      onAdded(result.place, result.alreadyExisted)
+      onAdded(result.place, result.alreadyExisted, thenLog)
       onDismiss()
     })
   }
@@ -60,29 +60,39 @@ export function CustomPinPrompt({
             setError(null)
           }}
           onKeyDown={(e) => {
-            if (e.key === "Enter") save()
+            if (e.key === "Enter") save(true)
           }}
           autoFocus
           placeholder="What is this place called?"
           className="bg-surface-raised border-line text-text placeholder:text-text-dim mt-3 w-full rounded-xl border px-3 py-2.5 text-base outline-none"
         />
         {error && <p className="text-r-good mt-2 text-sm">{error}</p>}
-        <div className="mt-4 flex gap-2">
+        <div className="mt-4 space-y-2">
           <button
             type="button"
-            onClick={save}
+            onClick={() => save(true)}
             disabled={pending}
-            className="bg-r-good text-text flex-1 rounded-full px-4 py-2.5 text-sm font-medium disabled:opacity-50"
+            className="bg-r-good text-text w-full rounded-full px-4 py-2.5 text-sm font-medium disabled:opacity-50"
           >
-            {pending ? "Saving…" : "Add to wishlist"}
+            {pending ? "Saving…" : "I ate here — log a visit"}
           </button>
-          <button
-            type="button"
-            onClick={onDismiss}
-            className="border-line text-text-dim hover:text-text rounded-full border px-4 py-2.5 text-sm"
-          >
-            Cancel
-          </button>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => save(false)}
+              disabled={pending}
+              className="border-line text-text hover:bg-surface-raised flex-1 rounded-full border px-4 py-2.5 text-sm disabled:opacity-50"
+            >
+              Add to wishlist
+            </button>
+            <button
+              type="button"
+              onClick={onDismiss}
+              className="border-line text-text-dim hover:text-text rounded-full border px-4 py-2.5 text-sm"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
     </div>
