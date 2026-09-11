@@ -209,7 +209,14 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
           between them on a wide screen and drops to its own row on a phone.
           Measured: squeezed between the pills at phone width the input gets
           135-190px, which is not enough to type a restaurant name into. */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-20 p-4">
+      {/* Shifted right on desktop while the rail is open, so the left column
+          controls are not buried under it. Transitions so the movement reads as
+          the rail pushing them aside rather than them teleporting. */}
+      <div
+        className={`pointer-events-none absolute inset-x-0 top-0 z-20 p-4 transition-[padding] duration-300 ${
+          selected ? "md:pl-[396px]" : ""
+        }`}
+      >
         <div className="flex items-start gap-3">
           <DealsPanel onSelectPlace={flyToPlace} />
 
@@ -272,7 +279,11 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
 
       {/* Ask, bottom-right. Its own surface rather than sharing the search bar:
           adding a place and interrogating the ones you have are different jobs. */}
-      <div className="pointer-events-none absolute bottom-4 left-4 z-20 flex flex-col items-start gap-2">
+      <div
+        className={`pointer-events-none absolute bottom-4 left-4 z-20 flex flex-col items-start gap-2 transition-[left] duration-300 ${
+          selected ? "md:left-[396px]" : ""
+        }`}
+      >
         {/* Recentre. Doubles as the permission prompt: the first tap is what
             asks for location, so the request always follows a deliberate
             action the user just took. */}

@@ -31,6 +31,9 @@ export function StorageMeter() {
     // Above the What now button, which owns the bottom-left corner. Stacking
     // rather than moving it elsewhere keeps the incidental information out of
     // the corners the thumb actually uses.
+    // Sits above the What now button. Kept at z-10 so the desktop rail covers
+    // it rather than the other way round - this is incidental information and
+    // is not worth shifting the layout for.
     <div className="pointer-events-none absolute bottom-20 left-4 z-10">
       <span className="bg-surface/80 border-line text-text-dim rounded-full border px-3 py-1.5 text-[11px] backdrop-blur-md">
         {total.count} photo{total.count === 1 ? "" : "s"} · {human(total.bytes)} ·{" "}

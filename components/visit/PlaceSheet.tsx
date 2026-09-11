@@ -84,6 +84,19 @@ export function PlaceSheet({
   // closes, not just when the place changes: otherwise adding a place (which
   // opens the form), closing, then tapping that same pin would reopen the form
   // instead of the history, because placeId never changed.
+  // Desktop gets a fixed full-height left rail; phones get a draggable bottom
+  // sheet. plan.md section 8: "On desktop, the sheet becomes a left rail at
+  // 380px and the map fills the rest." Snap points are a touch affordance and
+  // are simply wrong on a pointer device - there is nothing to drag toward.
+  const [isDesktop, setIsDesktop] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)")
+    const apply = () => setIsDesktop(mq.matches)
+    apply()
+    mq.addEventListener("change", apply)
+    return () => mq.removeEventListener("change", apply)
+  }, [])
+
   const [modeFor, setModeFor] = useState<string | null>(placeId)
   if (modeFor !== placeId) {
     setModeFor(placeId)
@@ -146,9 +159,13 @@ export function PlaceSheet({
           onClose()
         }
       }}
-      snapPoints={SNAP_POINTS}
-      activeSnapPoint={snap}
-      setActiveSnapPoint={setSnap}
+      // Snap points are a touch affordance and are wrong on a pointer device -
+      // there is nothing to drag toward on a full-height rail. Desktop gets a
+      // fixed panel per plan.md section 8; phones keep the draggable sheet.
+      snapPoints={isDesktop ? undefined : SNAP_POINTS}
+      activeSnapPoint={isDesktop ? undefined : snap}
+      setActiveSnapPoint={isDesktop ? undefined : setSnap}
+      direction={isDesktop ? "left" : "bottom"}
       // Bottom sheet, not modal - section 8 requires the map stay visible AND
       // interactive behind it.
       //
@@ -168,10 +185,17 @@ export function PlaceSheet({
           // 96dvh. Previously the element was always full height, so its
           // invisible upper portion sat over the map and swallowed every pan -
           // the map looked frozen whenever the sheet was open.
-          className="bg-surface border-line pointer-events-auto fixed inset-x-0 bottom-0 z-30 mx-auto flex max-w-md flex-col rounded-t-3xl border outline-none md:right-auto md:bottom-4 md:left-4 md:w-[380px] md:rounded-3xl"
+          className="bg-surface border-line pointer-events-auto fixed z-30 flex flex-col overflow-hidden border outline-none
+            inset-x-0 bottom-0 mx-auto max-w-md rounded-t-3xl
+            md:inset-y-0 md:right-auto md:left-0 md:mx-0 md:w-[380px] md:max-w-none md:rounded-none md:border-y-0"
           style={{
             boxShadow: "var(--shadow-float)",
-            height: `${(typeof snap === "number" ? snap : 0.55) * 100}dvh`,
+            // Phone only: height tracks the snap point so the element matches
+            // what is visible and does not cover the map with an invisible
+            // upper half. Desktop is a full-height rail, so it is left to CSS.
+            ...(isDesktop
+              ? {}
+              : { height: `${(typeof snap === "number" ? snap : 0.55) * 100}dvh` }),
           }}
           aria-describedby={undefined}
           // Without this, vaul steals focus back into the sheet on every
@@ -205,7 +229,7 @@ export function PlaceSheet({
               const i = SNAP_POINTS.indexOf(snap as number)
               setSnap(SNAP_POINTS[(i + 1) % SNAP_POINTS.length])
             }}
-            className="shrink-0 cursor-grab px-6 pt-3 pb-2"
+            className="shrink-0 cursor-grab px-6 pt-3 pb-2 md:hidden"
           >
             <Drawer.Handle className="bg-line-strong mx-auto !h-1.5 !w-12 rounded-full" />
           </div>
@@ -219,7 +243,7 @@ export function PlaceSheet({
               onClose()
             }}
             aria-label="Close"
-            className="text-text-dim hover:text-text absolute top-3 right-3 rounded-full p-1"
+            className="text-text-dim hover:text-text hover:bg-surface-raised absolute top-3 right-3 z-10 rounded-full p-2 transition-colors md:top-4 md:right-4"
           >
             <X className="h-5 w-5" />
           </button>
