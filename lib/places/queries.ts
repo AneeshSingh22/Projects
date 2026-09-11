@@ -19,7 +19,7 @@ export async function getPlaces(): Promise<PlaceMarker[]> {
   const { data, error } = await supabase
     .from("places")
     .select(
-      "id, name, lat, lng, status, cuisine, google_place_id, visits(rating)",
+      "id, name, lat, lng, status, category, cuisine, google_place_id, visits(rating)",
     )
     .order("created_at", { ascending: false })
 

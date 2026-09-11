@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { createClient } from "@/lib/supabase/server"
 import type { PlaceMarker, PlaceStatus } from "@/types/db"
+import { categoryFromGoogleType, type PlaceCategory } from "@/lib/categories"
 
 export type AddPlaceInput = {
   googlePlaceId: string | null
@@ -13,6 +14,9 @@ export type AddPlaceInput = {
   lat: number
   lng: number
   cuisine?: string | null
+  // Omitted means "work it out from the Google type". Passed explicitly when
+  // the user has chosen one.
+  category?: PlaceCategory
 }
 
 export type AddPlaceResult =
@@ -47,7 +51,7 @@ export async function addPlace(input: AddPlaceInput): Promise<AddPlaceResult> {
   if (input.googlePlaceId) {
     const { data: existing } = await supabase
       .from("places")
-      .select("id, name, lat, lng, status, cuisine, google_place_id")
+      .select("id, name, lat, lng, status, category, cuisine, google_place_id")
       .eq("user_id", user.id)
       .eq("google_place_id", input.googlePlaceId)
       .maybeSingle()
@@ -69,9 +73,13 @@ export async function addPlace(input: AddPlaceInput): Promise<AddPlaceResult> {
       lat: input.lat,
       lng: input.lng,
       cuisine: input.cuisine ?? null,
+      // Guessed from Google's place type unless the caller was explicit. The
+      // guess is always correctable in the UI, because no rule table gets every
+      // place right.
+      category: input.category ?? categoryFromGoogleType(input.cuisine),
       status: "want_to_try" satisfies PlaceStatus,
     })
-    .select("id, name, lat, lng, status, cuisine, google_place_id")
+    .select("id, name, lat, lng, status, category, cuisine, google_place_id")
     .single()
 
   if (error) {
@@ -133,4 +141,27 @@ export async function getPlaceDeleteImpact(
     .eq("user_id", user.id)
 
   return { visitCount: count ?? 0 }
+}
+
+// Changing a place's category after the fact - the automatic guess is only a
+// guess, and a wrong one should cost one tap to fix.
+export async function updatePlaceCategory(
+  placeId: string,
+  category: PlaceCategory,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: "Not signed in." }
+
+  const { error } = await supabase
+    .from("places")
+    .update({ category })
+    .eq("id", placeId)
+    .eq("user_id", user.id)
+
+  if (error) return { ok: false, error: error.message }
+  revalidatePath("/")
+  return { ok: true }
 }
