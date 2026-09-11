@@ -90,7 +90,10 @@ export function VisitForm({
     if (typeof parsed.rating === "number") {
       setRating(Math.min(10, Math.max(0, parsed.rating)))
     }
-    if (parsed.dishes?.length) setDetail(parsed.dishes.join(", "))
+    // Whichever the model filled goes into the single detail field - the form
+    // already knows which column to write it back to from the category.
+    const detailParts = [...(parsed.dishes ?? []), ...(parsed.activity ?? [])]
+    if (detailParts.length) setDetail(detailParts.join(", "))
     if (parsed.companions?.length) setCompanions(parsed.companions.join(", "))
     if (typeof parsed.pricePaid === "number") setPrice(String(parsed.pricePaid))
     if (typeof parsed.wouldReturn === "boolean") setWouldReturn(parsed.wouldReturn)

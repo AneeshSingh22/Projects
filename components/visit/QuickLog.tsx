@@ -75,7 +75,7 @@ export function QuickLog({
           onChange={(e) => setText(e.target.value)}
           rows={3}
           autoFocus
-          placeholder="great tonkotsu with Sarah, 8.5, would go back, about $22"
+          placeholder="pickup game with Rish, 8.5, courts were packed"
           className="bg-surface-raised border-line text-text placeholder:text-text-dim mt-1 w-full resize-none rounded-xl border px-3 py-2.5 text-base outline-none"
         />
         <p className="text-text-dim mt-1 text-xs">
