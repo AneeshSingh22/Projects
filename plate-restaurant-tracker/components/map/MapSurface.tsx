@@ -12,6 +12,7 @@ import { StorageMeter } from "@/components/visit/StorageMeter"
 import { OfflineBanner } from "@/components/pwa/OfflineBanner"
 import { CategoryPanel } from "./CategoryPanel"
 import { AskChat } from "./AskChat"
+import { DealsPanel } from "@/components/deals/DealsPanel"
 import { MapController } from "./MapController"
 import type { PlaceCategory } from "@/lib/categories"
 import { getPlaces } from "@/app/actions/refresh"
@@ -225,6 +226,11 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
 
       {/* Storage total - section 9, Phase 4. Free tier is 1GB and knowing where
           you stand is the difference between noticing and being surprised. */}
+      {/* Deals, top-left. A sibling of the map like every other overlay. */}
+      <div className="pointer-events-none absolute top-20 left-4 z-10 flex justify-start">
+        <DealsPanel onSelectPlace={flyToPlace} />
+      </div>
+
       {/* Counts panel. A sibling of the map like every other overlay. */}
       <div className="pointer-events-none absolute top-20 right-4 z-10 flex justify-end">
         <CategoryPanel
