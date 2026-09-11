@@ -74,20 +74,9 @@ export function PlaceSheet({
     }
   }, [placeId])
 
-  // Reset to the history view whenever a different place is opened, so the
-  // sheet never opens showing a half-filled form for the previous place.
-  //
-  // Keyed off placeId rather than synced in an effect: storing which place the
-  // current mode belongs to lets the reset be derived at render, which avoids
-  // a cascading second render every time a pin is tapped.
-  // Tracks which place the current mode belongs to. Cleared when the sheet
-  // closes, not just when the place changes: otherwise adding a place (which
-  // opens the form), closing, then tapping that same pin would reopen the form
-  // instead of the history, because placeId never changed.
   // Desktop gets a fixed full-height left rail; phones get a draggable bottom
   // sheet. plan.md section 8: "On desktop, the sheet becomes a left rail at
-  // 380px and the map fills the rest." Snap points are a touch affordance and
-  // are simply wrong on a pointer device - there is nothing to drag toward.
+  // 380px and the map fills the rest."
   const [isDesktop, setIsDesktop] = useState(false)
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 768px)")
@@ -97,17 +86,18 @@ export function PlaceSheet({
     return () => mq.removeEventListener("change", apply)
   }, [])
 
+  // Which place the current mode belongs to. Derived at render rather than
+  // synced in an effect, and cleared on close - otherwise adding a place (which
+  // opens the form), closing, then tapping that same pin would reopen the form
+  // rather than the history, because placeId never changed.
   const [modeFor, setModeFor] = useState<string | null>(placeId)
   if (modeFor !== placeId) {
     setModeFor(placeId)
     setMode(openToLog ? "new" : "view")
-    // Straight to the tallest detent when logging: the form needs the room,
-    // and landing on a half-height sheet with the fields cut off is the kind
-    // of thing that makes a 15-second log take a minute.
-    // The form opens at full height. Its save button sits below several fields,
+    // The form opens at full height: its save button sits below several fields,
     // and landing at half height means dragging the sheet up before you can
-    // finish - which is exactly the friction section 1's "log a visit in under
-    // 15 seconds" is measured against.
+    // finish - exactly the friction section 1's "log a visit in under 15
+    // seconds" is measured against.
     setSnap(openToLog ? SNAP_POINTS[2] : SNAP_POINTS[1])
   }
 
@@ -169,15 +159,25 @@ export function PlaceSheet({
       // Bottom sheet, not modal - section 8 requires the map stay visible AND
       // interactive behind it.
       //
-      // modal={false} alone is not enough. vaul still renders a full-screen
-      // overlay above the page and applies scroll locking, so every tap aimed
-      // at the map, the search pill or empty space was being swallowed - the
-      // app looked frozen with only the sheet responding.
-      //
-      // dismissible keeps drag-down-to-close; the overlay is simply never
-      // rendered, and the content below explicitly re-enables pointer events.
+      // modal={false} stops vaul rendering a full-screen overlay that would
+      // swallow every tap aimed at the map. dismissible keeps drag-to-close.
       modal={false}
       dismissible
+      // vaul puts position:fixed and overflow:hidden on <body> whenever a
+      // drawer is open. That freezes the ENTIRE page, which is why the map was
+      // unresponsive far outside the rail's own 380px - the sheet was not
+      // intercepting the gestures, the body was refusing to move at all.
+      //
+      // This app is a full-bleed map with floating panels, not a scrolling
+      // document, so there is no background scroll position worth locking.
+      noBodyStyles
+      preventScrollRestoration={false}
+      // Dragging only from the handle. Without it every drag inside the sheet
+      // competes with scrolling its content, and the two gestures are
+      // indistinguishable until one wins - usually the wrong one. This was lost
+      // in an earlier edit and is the second half of the same bug.
+      handleOnly
+      disablePreventScroll
     >
       <Drawer.Portal>
         <Drawer.Content
