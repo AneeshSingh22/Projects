@@ -22,7 +22,7 @@ export function PlacePin({
 }) {
   const rated = place.avg_rating != null
   const color = rated ? ratingColor(place.avg_rating) : RATING_NONE
-  const size = selected ? 40 : 34
+  const size = selected ? 52 : 44
 
   return (
     <AdvancedMarker
@@ -35,7 +35,7 @@ export function PlacePin({
     >
       {/* Transparent padding keeps the visible pin small while the touch target
           stays near the 44px minimum for a thumb. */}
-      <div className="flex h-12 w-12 items-end justify-center pb-0.5">
+      <div className="flex h-14 w-14 items-end justify-center pb-0.5">
         <div
           className="relative grid place-items-center transition-all duration-200 ease-out"
           style={{
@@ -55,15 +55,18 @@ export function PlacePin({
             <path
               d="M20 1.5c-10.2 0-18.5 8.1-18.5 18.1 0 10.4 12.3 21.1 17 24.8a2.4 2.4 0 0 0 3 0c4.7-3.7 17-14.4 17-24.8C39.5 9.6 31.2 1.5 21 1.5Z"
               fill={rated ? color : "var(--color-surface)"}
-              stroke={rated ? "rgba(255,255,255,0.92)" : color}
+              stroke={rated ? "rgba(255,255,255,0.95)" : color}
               strokeWidth={rated ? 2 : 3.5}
             />
           </svg>
           {rated && (
             <span
-              className="relative font-semibold tabular-nums text-white"
+              // Dark ink, not white. The fill is a rating colour tuned to read
+              // on a dark PANEL, and white on top of those measured as low as
+              // 2.63:1. Dark ink on the same fills measures 5.63:1 at worst.
+              className="text-ink relative font-bold tabular-nums"
               style={{
-                fontSize: selected ? 14 : 12,
+                fontSize: selected ? 18 : 15,
                 lineHeight: 1,
                 // Nudged up: the glyph must sit in the round head of the
                 // teardrop, not in its point.
