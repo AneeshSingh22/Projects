@@ -189,10 +189,40 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
       </Map>
 
       {/* Overlays: siblings of the map, free to re-render and unmount. */}
-      {/* Below the corner controls rather than level with them: at phone width
-          the two pills plus a centred bar cannot share a row without crowding. */}
-      <div className="pointer-events-none absolute inset-x-0 top-20 z-10 px-4">
-        <div className="mx-auto max-w-md">
+      {/* One top bar rather than three floating blocks.
+          
+          Deals and the places count anchor to the corners; the search bar sits
+          between them on a wide screen and drops to its own row on a phone.
+          Measured: squeezed between the pills at phone width the input gets
+          135-190px, which is not enough to type a restaurant name into. */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-20 p-4">
+        <div className="flex items-start gap-3">
+          <DealsPanel onSelectPlace={flyToPlace} />
+
+          {/* Hidden on phones, where it lives in the row below instead. */}
+          <div className="hidden min-w-0 flex-1 justify-center sm:flex">
+            <div className="w-full max-w-md">
+              <SearchPill onAdded={handleAdded} />
+            </div>
+          </div>
+
+          {/* Pushes the count to the right edge once the bar above is hidden. */}
+          <div className="ml-auto sm:ml-0">
+            <CategoryPanel
+              places={places}
+              activeFilter={filter}
+              onFilterChange={setFilter}
+              onSelectPlace={(p) => {
+                setPanTo({ lat: p.lat, lng: p.lng })
+                setSelectedId(p.id)
+                setOpenToLog(false)
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Phone-only search row, directly under the pills. */}
+        <div className="mt-3 sm:hidden">
           <SearchPill onAdded={handleAdded} />
         </div>
       </div>
@@ -213,8 +243,8 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
         />
       )}
 
-      {/* Sibling of the map, never a wrapper. Opening, closing and dragging
-          the sheet re-renders only this subtree - the map instance is never
+      {/* Sibling of the map, never a wrapper. Opening, closing and dragging the
+          sheet re-renders only this subtree - the map instance is never
           touched, which is what keeps the mount count at 1. */}
       <PlaceSheet
         place={selected}
@@ -226,30 +256,8 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
         onChanged={refreshPlaces}
       />
 
-      {/* Storage total - section 9, Phase 4. Free tier is 1GB and knowing where
-          you stand is the difference between noticing and being surprised. */}
-      {/* Deals, top-left. A sibling of the map like every other overlay. */}
-      <div className="pointer-events-none absolute top-4 left-4 z-20 flex justify-start">
-        <DealsPanel onSelectPlace={flyToPlace} />
-      </div>
-
-      {/* Counts panel. A sibling of the map like every other overlay. */}
-      <div className="pointer-events-none absolute top-4 right-4 z-20 flex justify-end">
-        <CategoryPanel
-          places={places}
-          activeFilter={filter}
-          onFilterChange={setFilter}
-          onSelectPlace={(p) => {
-            setPanTo({ lat: p.lat, lng: p.lng })
-            setSelectedId(p.id)
-            setOpenToLog(false)
-          }}
-        />
-      </div>
-
-      {/* Ask, bottom-right. Its own surface rather than sharing the search
-          bar: adding a place and interrogating the ones you have are different
-          jobs, and overloading one input made both less obvious. */}
+      {/* Ask, bottom-right. Its own surface rather than sharing the search bar:
+          adding a place and interrogating the ones you have are different jobs. */}
       <div className="absolute right-4 bottom-4 z-20 flex flex-col items-end">
         <AskChat
           onResults={setAskIds}
