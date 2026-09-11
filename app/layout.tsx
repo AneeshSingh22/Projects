@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next"
 import { Fraunces, Geist } from "next/font/google"
 import { MapsProvider } from "@/components/map/MapsProvider"
+import { ServiceWorker } from "@/components/pwa/ServiceWorker"
 import "./globals.css"
 
 // plan.md section 8. Two families, clearly distinct.
@@ -51,6 +52,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             unmounts, so the Maps script is fetched once per session. It sits
             above {children} so client-side navigation cannot tear it down. */}
         <MapsProvider>{children}</MapsProvider>
+        <ServiceWorker />
       </body>
     </html>
   )

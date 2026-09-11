@@ -195,3 +195,39 @@ body {
   box-shadow: 0 1px 4px rgb(0 0 0 / 0.5);
   cursor: grab;
 }
+
+/* ---- Accessibility pass, plan.md section 9, Phase 6 --------------------- */
+
+/* Visible keyboard focus. :focus-visible rather than :focus, so a mouse or
+   thumb tap does not leave a ring behind while keyboard users still get one. */
+:where(button, a, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+  border-radius: 9999px;
+}
+
+/* Honour a system request for less motion.
+   Not set to 0s: some libraries read the computed duration and a true zero can
+   leave an element stuck mid-transition with no transitionend event. 0.01ms is
+   imperceptible and still fires. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* iOS zooms the page when a font smaller than 16px gets focus, which shifts the
+   whole map. Every input in this app is already >=16px; this is a guard so a
+   future one cannot reintroduce it. */
+@supports (-webkit-touch-callout: none) {
+  input,
+  textarea,
+  select {
+    font-size: max(16px, 1rem);
+  }
+}
