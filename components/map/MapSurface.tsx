@@ -10,6 +10,9 @@ import { CustomPinPrompt, type PinCandidate } from "./CustomPinPrompt"
 import { PlaceSheet } from "@/components/visit/PlaceSheet"
 import { StorageMeter } from "@/components/visit/StorageMeter"
 import { OfflineBanner } from "@/components/pwa/OfflineBanner"
+import { CategoryPanel } from "./CategoryPanel"
+import { MapController } from "./MapController"
+import type { PlaceCategory } from "@/lib/categories"
 import { getPlaces } from "@/app/actions/refresh"
 import type { PlaceMarker } from "@/types/db"
 
@@ -61,6 +64,8 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
   // history view. Set by the "I ate here" path so adding a place and recording
   // the meal is one continuous action.
   const [openToLog, setOpenToLog] = useState(false)
+  const [filter, setFilter] = useState<PlaceCategory | null>(null)
+  const [panTo, setPanTo] = useState<{ lat: number; lng: number } | null>(null)
 
   const handleAdded = useCallback(
     (place: PlaceMarker, alreadyExisted: boolean, thenLog = false) => {
@@ -119,6 +124,12 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
 
   const selected = places.find((p) => p.id === selectedId) ?? null
 
+  // Filtering hides pins from the map; it never refetches. Everything is
+  // already in memory, so this is a render-time concern only.
+  const visiblePlaces = filter
+    ? places.filter((p) => p.category === filter)
+    : places
+
   return (
     <div className="relative h-dvh w-full overflow-hidden">
       {/* Always mounted. Never conditional, never keyed. Section 5, Rule 2. */}
@@ -134,8 +145,9 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
         className="absolute inset-0 h-full w-full"
       >
         <MapMountCounter />
+        <MapController target={panTo} onDone={() => setPanTo(null)} />
         {/* Data-driven children. Section 5, Rule 3. */}
-        {places.map((p) => (
+        {visiblePlaces.map((p) => (
           <PlacePin
             key={p.id}
             place={p}
@@ -187,6 +199,20 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
 
       {/* Storage total - section 9, Phase 4. Free tier is 1GB and knowing where
           you stand is the difference between noticing and being surprised. */}
+      {/* Counts panel. A sibling of the map like every other overlay. */}
+      <div className="pointer-events-none absolute top-20 right-4 z-10 flex justify-end">
+        <CategoryPanel
+          places={places}
+          activeFilter={filter}
+          onFilterChange={setFilter}
+          onSelectPlace={(p) => {
+            setPanTo({ lat: p.lat, lng: p.lng })
+            setSelectedId(p.id)
+            setOpenToLog(false)
+          }}
+        />
+      </div>
+
       <OfflineBanner />
       <StorageMeter />
 

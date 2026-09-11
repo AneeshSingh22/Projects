@@ -2,6 +2,8 @@
 // than generated: the schema is stable, and a generated file is one more thing
 // that can silently drift from what is actually deployed.
 
+import type { PlaceCategory } from "@/lib/categories"
+
 export type PlaceStatus = "want_to_try" | "visited" | "favorite" | "avoid"
 
 export type Place = {
@@ -15,6 +17,7 @@ export type Place = {
   lat: number
   lng: number
   status: PlaceStatus
+  category: PlaceCategory
   cuisine: string | null
   price_level: number | null
   notes: string | null
@@ -27,7 +30,14 @@ export type Place = {
 // honest about its payload size.
 export type PlaceMarker = Pick<
   Place,
-  "id" | "name" | "lat" | "lng" | "status" | "cuisine" | "google_place_id"
+  | "id"
+  | "name"
+  | "lat"
+  | "lng"
+  | "status"
+  | "category"
+  | "cuisine"
+  | "google_place_id"
 > & {
   // Carried on the marker so a pin can be coloured by how good the place is
   // rather than merely whether it has been visited. Computed in the query, not
@@ -44,6 +54,7 @@ export type Visit = {
   rating: number | null
   notes: string | null
   dishes: string[] | null
+  activity: string[] | null
   companions: string[] | null
   price_paid: number | null
   would_return: boolean | null
