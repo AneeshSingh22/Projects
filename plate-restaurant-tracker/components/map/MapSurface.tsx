@@ -14,6 +14,9 @@ import { CategoryPanel } from "./CategoryPanel"
 import { AskChat } from "./AskChat"
 import { DealsPanel } from "@/components/deals/DealsPanel"
 import { WhatNow } from "@/components/suggest/WhatNow"
+import { UserLocation } from "./UserLocation"
+import { useLocation } from "@/lib/location/useLocation"
+import { LocateFixed, Loader2 } from "lucide-react"
 import { MapController } from "./MapController"
 import type { PlaceCategory } from "@/lib/categories"
 import { getPlaces } from "@/app/actions/refresh"
@@ -69,6 +72,11 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
   const [openToLog, setOpenToLog] = useState(false)
   const [filter, setFilter] = useState<PlaceCategory | null>(null)
   const [panTo, setPanTo] = useState<{ lat: number; lng: number } | null>(null)
+  // Off until asked for. Starting a GPS watch on page load would prompt for
+  // permission before the user has done anything, which is how apps train
+  // people to hit Deny reflexively.
+  const [locationOn, setLocationOn] = useState(false)
+  const { fix, status } = useLocation(locationOn)
   // Which pins a natural-language question narrowed the map to. null means no
   // question is active, which is different from a question that matched
   // nothing - that case must show an empty map, not every pin.
@@ -173,6 +181,7 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
         className="absolute inset-0 h-full w-full"
       >
         <MapMountCounter />
+        <UserLocation fix={fix} />
         <MapController target={panTo} onDone={() => setPanTo(null)} />
         {/* Data-driven children. Section 5, Rule 3. */}
         {visiblePlaces.map((p) => (
@@ -259,7 +268,39 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
 
       {/* Ask, bottom-right. Its own surface rather than sharing the search bar:
           adding a place and interrogating the ones you have are different jobs. */}
-      <div className="pointer-events-none absolute bottom-4 left-4 z-20 flex flex-col items-start">
+      <div className="pointer-events-none absolute bottom-4 left-4 z-20 flex flex-col items-start gap-2">
+        {/* Recentre. Doubles as the permission prompt: the first tap is what
+            asks for location, so the request always follows a deliberate
+            action the user just took. */}
+        <button
+          type="button"
+          onClick={() => {
+            if (!locationOn) {
+              setLocationOn(true)
+              return
+            }
+            if (fix) setPanTo({ lat: fix.lat, lng: fix.lng })
+          }}
+          aria-label={locationOn ? "Centre on my location" : "Show my location"}
+          className={`bg-surface/95 border-line pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full border backdrop-blur-xl transition-all sm:h-14 sm:w-14 ${
+            status === "denied" ? "text-text-dim" : "text-text"
+          }`}
+          style={{ boxShadow: "var(--shadow-panel)" }}
+          title={
+            status === "denied"
+              ? "Location permission was denied - enable it in your browser settings"
+              : undefined
+          }
+        >
+          {status === "locating" ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <LocateFixed
+              className={`h-5 w-5 sm:h-6 sm:w-6 ${fix ? "text-[#1a73e8]" : ""}`}
+            />
+          )}
+        </button>
+
         <WhatNow onSelectPlace={flyToPlace} />
       </div>
 
