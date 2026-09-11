@@ -74,7 +74,9 @@ export function CustomPinPrompt({
             disabled={pending}
             className="bg-r-good text-text w-full rounded-full px-4 py-2.5 text-sm font-medium disabled:opacity-50"
           >
-            {pending ? "Saving…" : "I ate here — log a visit"}
+            {/* A hand-dropped pin has no Google type to categorise from, so
+                this stays generic rather than guessing wrong. */}
+            {pending ? "Saving…" : "Log a visit here"}
           </button>
           <div className="flex gap-2">
             <button

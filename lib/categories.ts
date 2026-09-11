@@ -31,6 +31,11 @@ type CategoryMeta = {
   detailPlaceholder: string
   // Google's includedPrimaryTypes for autocomplete when this filter is active.
   searchTypes: string[]
+  // What the primary action says when adding a place you have just been to.
+  // "I ate here" on a basketball court reads as a bug, so this is per category
+  // rather than one generic string - the category is already known at that
+  // point, so there is no reason to be vague.
+  visitedVerb: string
 }
 
 export const CATEGORIES: Record<PlaceCategory, CategoryMeta> = {
@@ -40,6 +45,7 @@ export const CATEGORIES: Record<PlaceCategory, CategoryMeta> = {
     detailLabel: "Dishes",
     detailPlaceholder: "tonkotsu, gyoza",
     searchTypes: ["restaurant", "cafe", "bar", "bakery"],
+    visitedVerb: "I ate here"
   },
   entertainment: {
     label: "Entertainment",
@@ -54,6 +60,7 @@ export const CATEGORIES: Record<PlaceCategory, CategoryMeta> = {
       "art_gallery",
       "tourist_attraction",
     ],
+    visitedVerb: "I went here"
   },
   sports: {
     label: "Sports",
@@ -61,6 +68,7 @@ export const CATEGORIES: Record<PlaceCategory, CategoryMeta> = {
     detailLabel: "Activity",
     detailPlaceholder: "pickup basketball",
     searchTypes: ["stadium", "gym", "sports_complex", "arena"],
+    visitedVerb: "I played here"
   },
   outdoors: {
     label: "Parks & nature",
@@ -68,6 +76,7 @@ export const CATEGORIES: Record<PlaceCategory, CategoryMeta> = {
     detailLabel: "What did you do",
     detailPlaceholder: "walked the loop",
     searchTypes: ["park", "hiking_area", "national_park", "beach"],
+    visitedVerb: "I was here"
   },
   other: {
     label: "Other",
@@ -75,6 +84,7 @@ export const CATEGORIES: Record<PlaceCategory, CategoryMeta> = {
     detailLabel: "What stood out",
     detailPlaceholder: "anything worth remembering",
     searchTypes: [],
+    visitedVerb: "I was here"
   },
 }
 
