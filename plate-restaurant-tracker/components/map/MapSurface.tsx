@@ -11,6 +11,7 @@ import { PlaceSheet } from "@/components/visit/PlaceSheet"
 import { StorageMeter } from "@/components/visit/StorageMeter"
 import { OfflineBanner } from "@/components/pwa/OfflineBanner"
 import { CategoryPanel } from "./CategoryPanel"
+import { AskBar } from "./AskBar"
 import { MapController } from "./MapController"
 import type { PlaceCategory } from "@/lib/categories"
 import { getPlaces } from "@/app/actions/refresh"
@@ -66,6 +67,11 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
   const [openToLog, setOpenToLog] = useState(false)
   const [filter, setFilter] = useState<PlaceCategory | null>(null)
   const [panTo, setPanTo] = useState<{ lat: number; lng: number } | null>(null)
+  // Which pins a natural-language question narrowed the map to. null means no
+  // question is active, which is different from a question that matched
+  // nothing - that case must show an empty map, not every pin.
+  const [askIds, setAskIds] = useState<string[] | null>(null)
+  const [mode, setMode] = useState<"add" | "ask">("add")
 
   const handleAdded = useCallback(
     (place: PlaceMarker, alreadyExisted: boolean, thenLog = false) => {
@@ -126,9 +132,15 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
 
   // Filtering hides pins from the map; it never refetches. Everything is
   // already in memory, so this is a render-time concern only.
-  const visiblePlaces = filter
-    ? places.filter((p) => p.category === filter)
-    : places
+  const visiblePlaces = (() => {
+    let out = places
+    if (askIds) {
+      const keep = new Set(askIds)
+      out = out.filter((p) => keep.has(p.id))
+    }
+    if (filter) out = out.filter((p) => p.category === filter)
+    return out
+  })()
 
   return (
     <div className="relative h-dvh w-full overflow-hidden">
@@ -164,7 +176,42 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
       {/* Overlays: siblings of the map, free to re-render and unmount. */}
       <div className="pointer-events-none absolute inset-x-0 top-0 z-10 p-4">
         <div className="mx-auto max-w-md">
-          <SearchPill onAdded={handleAdded} />
+          {/* Two jobs, one slot: adding a new place, and asking about the ones
+              you have. Kept as a toggle rather than two bars so the map is not
+              squeezed by permanent chrome. */}
+          <div className="pointer-events-auto mb-2 flex justify-center gap-1">
+            {(["add", "ask"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => {
+                  setMode(m)
+                  if (m === "add") setAskIds(null)
+                }}
+                className={`rounded-full border px-3 py-1 text-xs backdrop-blur-md transition-colors ${
+                  mode === m
+                    ? "bg-surface border-line text-text"
+                    : "bg-surface/60 border-line text-text-dim"
+                }`}
+              >
+                {m === "add" ? "Add a place" : "Ask"}
+              </button>
+            ))}
+          </div>
+
+          {mode === "add" ? (
+            <SearchPill onAdded={handleAdded} />
+          ) : (
+            <AskBar
+              onResults={setAskIds}
+              onClear={() => setAskIds(null)}
+              onSelectPlace={(p) => {
+                setPanTo({ lat: p.lat, lng: p.lng })
+                setSelectedId(p.id)
+                setOpenToLog(false)
+              }}
+            />
+          )}
         </div>
       </div>
 
