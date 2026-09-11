@@ -98,6 +98,10 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
       )
       setSelectedId(place.id)
       setOpenToLog(thenLog)
+      // Pan to whatever was just added, so the new pin is visible behind the
+      // sheet. Chains have several locations and the only way to confirm the
+      // right one was picked is to see it on the map.
+      setPanTo({ lat: place.lat, lng: place.lng })
       // No toast when going straight to the form - the sheet opening is
       // feedback enough, and a toast would cover the fields.
       if (!thenLog) {

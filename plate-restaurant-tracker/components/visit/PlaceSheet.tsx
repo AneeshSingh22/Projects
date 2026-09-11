@@ -91,6 +91,10 @@ export function PlaceSheet({
     // Straight to the tallest detent when logging: the form needs the room,
     // and landing on a half-height sheet with the fields cut off is the kind
     // of thing that makes a 15-second log take a minute.
+    // The form opens at full height. Its save button sits below several fields,
+    // and landing at half height means dragging the sheet up before you can
+    // finish - which is exactly the friction section 1's "log a visit in under
+    // 15 seconds" is measured against.
     setSnap(openToLog ? SNAP_POINTS[2] : SNAP_POINTS[1])
   }
 
@@ -160,8 +164,15 @@ export function PlaceSheet({
     >
       <Drawer.Portal>
         <Drawer.Content
-          className="bg-surface border-line pointer-events-auto fixed inset-x-0 bottom-0 z-30 mx-auto flex h-[96dvh] max-w-md flex-col rounded-t-3xl border outline-none md:right-auto md:bottom-4 md:left-4 md:w-[380px] md:rounded-3xl"
-          style={{ boxShadow: "var(--shadow-float)" }}
+          // Height follows the active snap point rather than being fixed at
+          // 96dvh. Previously the element was always full height, so its
+          // invisible upper portion sat over the map and swallowed every pan -
+          // the map looked frozen whenever the sheet was open.
+          className="bg-surface border-line pointer-events-auto fixed inset-x-0 bottom-0 z-30 mx-auto flex max-w-md flex-col rounded-t-3xl border outline-none md:right-auto md:bottom-4 md:left-4 md:w-[380px] md:rounded-3xl"
+          style={{
+            boxShadow: "var(--shadow-float)",
+            height: `${(typeof snap === "number" ? snap : 0.55) * 100}dvh`,
+          }}
           aria-describedby={undefined}
           // Without this, vaul steals focus back into the sheet on every
           // outside tap, which is what made the map unclickable even once the
@@ -185,20 +196,19 @@ export function PlaceSheet({
             e.preventDefault()
           }}
         >
-          {/* Drag handle. Also cycles detents on tap: dragging is fiddly with
-              a trackpad, and on a phone a tap target is more reliable than a
-              precise drag when the sheet is nearly full. */}
-          <button
-            type="button"
-            aria-label="Resize panel"
+          {/* vaul's own handle: with handleOnly set, this is the only element
+              that initiates a drag, which leaves the content free to scroll.
+              Wrapped so a tap still cycles the detents, since dragging is
+              fiddly on a trackpad. */}
+          <div
             onClick={() => {
               const i = SNAP_POINTS.indexOf(snap as number)
               setSnap(SNAP_POINTS[(i + 1) % SNAP_POINTS.length])
             }}
-            className="mx-auto mt-3 shrink-0 cursor-grab px-6 py-2"
+            className="shrink-0 cursor-grab px-6 pt-3 pb-2"
           >
-            <span className="bg-line-strong block h-1.5 w-12 rounded-full" />
-          </button>
+            <Drawer.Handle className="bg-line-strong mx-auto !h-1.5 !w-12 rounded-full" />
+          </div>
 
           {/* Explicit close. Drag-to-dismiss is not discoverable, and on
               desktop there is no obvious gesture at all. */}
