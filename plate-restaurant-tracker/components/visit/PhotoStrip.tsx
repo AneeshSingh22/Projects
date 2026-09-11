@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { createPortal } from "react-dom"
 import { X, Trash2 } from "lucide-react"
 import { deletePhoto, type SignedPhoto } from "@/app/actions/photos"
 
@@ -21,9 +22,7 @@ import { deletePhoto, type SignedPhoto } from "@/app/actions/photos"
 //   2. Optimising on Vercel is a metered operation. Section 2.1 requires this
 //      app cost nothing, and paying to shrink images the browser already shrank
 //      to 30KB is the wrong trade.
-//   3. The images are already exactly the size they are displayed at - a 400px
-//      thumbnail in a 64px box, a 1600px image in a lightbox. There is nothing
-//      left for an optimiser to do.
+//   3. The images are already exactly the size they are displayed at.
 export function PhotoStrip({
   photos,
   onChanged,
@@ -34,17 +33,77 @@ export function PhotoStrip({
   const [lightbox, setLightbox] = useState<SignedPhoto | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
 
+  // Escape closes the lightbox, matching every other image viewer.
+  useEffect(() => {
+    if (!lightbox) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightbox(null)
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [lightbox])
+
   if (photos.length === 0) return null
+
+  const lightboxNode = lightbox ? (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4"
+      onClick={() => setLightbox(null)}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Photo"
+    >
+      <button
+        type="button"
+        aria-label="Close photo"
+        onClick={() => setLightbox(null)}
+        className="absolute top-4 right-4 rounded-full bg-white/10 p-2 text-white/80 hover:text-white"
+      >
+        <X className="h-6 w-6" />
+      </button>
+
+      {lightbox.fullUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={lightbox.fullUrl}
+          alt={lightbox.caption ?? "Visit photo"}
+          className="max-h-[85dvh] max-w-full rounded-lg object-contain"
+          onClick={(e) => e.stopPropagation()}
+        />
+      )}
+
+      <button
+        type="button"
+        disabled={deleting === lightbox.id}
+        onClick={async (e) => {
+          e.stopPropagation()
+          if (!confirm("Delete this photo? This cannot be undone.")) return
+          setDeleting(lightbox.id)
+          await deletePhoto(lightbox.id)
+          setDeleting(null)
+          setLightbox(null)
+          onChanged()
+        }}
+        className="absolute bottom-6 flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm text-white/80 backdrop-blur-md hover:text-white disabled:opacity-50"
+      >
+        <Trash2 className="h-4 w-4" />
+        {deleting === lightbox.id ? "Deleting…" : "Delete photo"}
+      </button>
+    </div>
+  ) : null
 
   return (
     <>
+      {/* Bigger thumbnails. At 64px a plate of food is unrecognisable, which
+          defeats the point of having photos at all. These are 96px and the
+          strip scrolls horizontally when there are several. */}
       <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
         {photos.map((p) => (
           <button
             key={p.id}
             type="button"
             onClick={() => setLightbox(p)}
-            className="border-line h-16 w-16 shrink-0 overflow-hidden rounded-lg border"
+            className="border-line h-24 w-24 shrink-0 overflow-hidden rounded-lg border transition-opacity hover:opacity-80"
           >
             {p.thumbUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -61,49 +120,17 @@ export function PhotoStrip({
         ))}
       </div>
 
-      {lightbox && (
-        <div
-          className="bg-ink/95 fixed inset-0 z-50 flex items-center justify-center p-4"
-          onClick={() => setLightbox(null)}
-        >
-          <button
-            type="button"
-            aria-label="Close photo"
-            onClick={() => setLightbox(null)}
-            className="text-text-dim hover:text-text absolute top-4 right-4"
-          >
-            <X className="h-6 w-6" />
-          </button>
-
-          {lightbox.fullUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={lightbox.fullUrl}
-              alt={lightbox.caption ?? "Visit photo"}
-              className="max-h-full max-w-full rounded-lg object-contain"
-              onClick={(e) => e.stopPropagation()}
-            />
-          )}
-
-          <button
-            type="button"
-            disabled={deleting === lightbox.id}
-            onClick={async (e) => {
-              e.stopPropagation()
-              if (!confirm("Delete this photo? This cannot be undone.")) return
-              setDeleting(lightbox.id)
-              await deletePhoto(lightbox.id)
-              setDeleting(null)
-              setLightbox(null)
-              onChanged()
-            }}
-            className="bg-surface/90 border-line text-text-dim hover:text-r-low absolute bottom-6 flex items-center gap-2 rounded-full border px-4 py-2 text-sm backdrop-blur-md disabled:opacity-50"
-          >
-            <Trash2 className="h-4 w-4" />
-            {deleting === lightbox.id ? "Deleting…" : "Delete photo"}
-          </button>
-        </div>
-      )}
+      {/* Rendered into document.body rather than inline.
+          The strip lives inside the sheet, which creates its own stacking
+          context - so a lightbox rendered here appeared UNDERNEATH the sheet
+          no matter how high its z-index went. Portalling to the body escapes
+          that context entirely. */}
+      {/* document exists only in the browser; this component is inside the
+          sheet which never server-renders its open state, but the guard keeps
+          it safe regardless without needing a mounted flag in state. */}
+      {lightboxNode && typeof document !== "undefined"
+        ? createPortal(lightboxNode, document.body)
+        : null}
     </>
   )
 }

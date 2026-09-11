@@ -133,7 +133,20 @@ export function PlaceSheet({
           onInteractOutside={(e) => e.preventDefault()}
           onPointerDownOutside={(e) => e.preventDefault()}
         >
-          <div className="bg-line mx-auto mt-3 h-1 w-10 shrink-0 rounded-full" />
+          {/* Drag handle. Also cycles detents on tap: dragging is fiddly with
+              a trackpad, and on a phone a tap target is more reliable than a
+              precise drag when the sheet is nearly full. */}
+          <button
+            type="button"
+            aria-label="Resize panel"
+            onClick={() => {
+              const i = SNAP_POINTS.indexOf(snap as number)
+              setSnap(SNAP_POINTS[(i + 1) % SNAP_POINTS.length])
+            }}
+            className="mx-auto mt-3 shrink-0 cursor-grab px-6 py-2"
+          >
+            <span className="bg-line block h-1.5 w-12 rounded-full" />
+          </button>
 
           {/* Explicit close. Drag-to-dismiss is not discoverable, and on
               desktop there is no obvious gesture at all. */}
