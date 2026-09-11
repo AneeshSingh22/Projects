@@ -13,6 +13,7 @@ import { OfflineBanner } from "@/components/pwa/OfflineBanner"
 import { CategoryPanel } from "./CategoryPanel"
 import { AskChat } from "./AskChat"
 import { DealsPanel } from "@/components/deals/DealsPanel"
+import { WhatNow } from "@/components/suggest/WhatNow"
 import { MapController } from "./MapController"
 import type { PlaceCategory } from "@/lib/categories"
 import { getPlaces } from "@/app/actions/refresh"
@@ -258,6 +259,10 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
 
       {/* Ask, bottom-right. Its own surface rather than sharing the search bar:
           adding a place and interrogating the ones you have are different jobs. */}
+      <div className="pointer-events-none absolute bottom-4 left-4 z-20 flex flex-col items-start">
+        <WhatNow onSelectPlace={flyToPlace} />
+      </div>
+
       <div className="absolute right-4 bottom-4 z-20 flex flex-col items-end">
         <AskChat
           onResults={setAskIds}
