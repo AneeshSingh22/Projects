@@ -47,8 +47,13 @@ export function PhotoStrip({
 
   const lightboxNode = lightbox ? (
     <div
+      // Marks this subtree as a deliberate overlay. PlaceSheet checks for this
+      // so its outside-tap guard does not swallow clicks in here.
+      data-plate-overlay=""
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4"
-      onClick={() => setLightbox(null)}
+      // Same reasoning as the close button: pointerdown rather than click, so
+      // the three ways out of here (backdrop, X, Escape) all behave the same.
+      onPointerDown={() => setLightbox(null)}
       role="dialog"
       aria-modal="true"
       aria-label="Photo"
@@ -56,8 +61,14 @@ export function PhotoStrip({
       <button
         type="button"
         aria-label="Close photo"
-        onClick={() => setLightbox(null)}
-        className="absolute top-4 right-4 rounded-full bg-white/10 p-2 text-white/80 hover:text-white"
+        // pointerdown, not click: a click requires a matching down and up on
+        // the same element, which is fragile when an ancestor is also handling
+        // pointer events. Closing on the press is also simply more responsive.
+        onPointerDown={(e) => {
+          e.stopPropagation()
+          setLightbox(null)
+        }}
+        className="absolute top-4 right-4 z-10 rounded-full bg-white/15 p-3 text-white hover:bg-white/25"
       >
         <X className="h-6 w-6" />
       </button>
@@ -68,13 +79,17 @@ export function PhotoStrip({
           src={lightbox.fullUrl}
           alt={lightbox.caption ?? "Visit photo"}
           className="max-h-[85dvh] max-w-full rounded-lg object-contain"
-          onClick={(e) => e.stopPropagation()}
+          // Tapping the photo itself must not dismiss it.
+          onPointerDown={(e) => e.stopPropagation()}
         />
       )}
 
       <button
         type="button"
         disabled={deleting === lightbox.id}
+        // stopPropagation on the press so the backdrop handler above does not
+        // close the lightbox before this button's click can run.
+        onPointerDown={(e) => e.stopPropagation()}
         onClick={async (e) => {
           e.stopPropagation()
           if (!confirm("Delete this photo? This cannot be undone.")) return
