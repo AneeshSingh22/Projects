@@ -134,7 +134,13 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
   // already in memory, so this is a render-time concern only.
   const visiblePlaces = (() => {
     let out = places
-    if (askIds) {
+    // Only narrow when a question actually matched something.
+    //
+    // This previously checked `if (askIds)`, and an empty array is truthy in
+    // JavaScript - so a question that matched nothing hid every pin on the map
+    // and kept them hidden after switching back to adding places. The pins
+    // looked permanently lost when they had only been filtered to zero.
+    if (askIds && askIds.length > 0) {
       const keep = new Set(askIds)
       out = out.filter((p) => keep.has(p.id))
     }
