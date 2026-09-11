@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react"
-import { UtensilsCrossed, Drama, Dumbbell, Trees, MapPin } from "lucide-react"
+import { UtensilsCrossed, Martini, Drama, Dumbbell, Trees, MapPin } from "lucide-react"
 
 // Categories, and how a Google place type maps onto one.
 //
@@ -9,6 +9,7 @@ import { UtensilsCrossed, Drama, Dumbbell, Trees, MapPin } from "lucide-react"
 
 export type PlaceCategory =
   | "food_drink"
+  | "nightlife"
   | "entertainment"
   | "sports"
   | "outdoors"
@@ -16,6 +17,7 @@ export type PlaceCategory =
 
 export const CATEGORY_ORDER: PlaceCategory[] = [
   "food_drink",
+  "nightlife",
   "entertainment",
   "sports",
   "outdoors",
@@ -46,6 +48,14 @@ export const CATEGORIES: Record<PlaceCategory, CategoryMeta> = {
     detailPlaceholder: "tonkotsu, gyoza",
     searchTypes: ["restaurant", "cafe", "bar", "bakery"],
     visitedVerb: "I ate here"
+  },
+  nightlife: {
+    label: "Bars & nightlife",
+    icon: Martini,
+    detailLabel: "What did you drink",
+    detailPlaceholder: "old fashioned, house red",
+    searchTypes: ["bar", "night_club", "pub", "wine_bar"],
+    visitedVerb: "I went here",
   },
   entertainment: {
     label: "Entertainment",
@@ -100,11 +110,20 @@ export const CATEGORIES: Record<PlaceCategory, CategoryMeta> = {
 // An unrecognised type falling through to "other" is a fine outcome, since the
 // UI lets the category be changed in one tap.
 const RULES: { match: string[]; category: PlaceCategory }[] = [
+  // Nightlife is checked BEFORE food, because a wine bar matches both and the
+  // more specific answer should win. Rule order is load-bearing here.
+  {
+    category: "nightlife",
+    match: [
+      "bar", "night_club", "nightclub", "pub", "brewery", "winery",
+      "cocktail", "lounge", "speakeasy", "taproom",
+    ],
+  },
   {
     category: "food_drink",
     match: [
-      "restaurant", "cafe", "coffee", "bar", "bakery", "food", "meal",
-      "ice_cream", "dessert", "brewery", "winery", "pub", "diner", "deli",
+      "restaurant", "cafe", "coffee", "bakery", "food", "meal",
+      "ice_cream", "dessert", "diner", "deli", "steak", "pizza", "sushi",
     ],
   },
   {
