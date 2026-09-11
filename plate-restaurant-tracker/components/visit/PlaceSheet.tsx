@@ -31,10 +31,14 @@ function formatDate(iso: string): string {
 
 export function PlaceSheet({
   place,
+  openToLog = false,
   onClose,
   onChanged,
 }: {
   place: PlaceMarker | null
+  // Open straight into the visit form instead of the history view. Used by the
+  // "I ate here" path so adding a place and logging the meal is one action.
+  openToLog?: boolean
   onClose: () => void
   onChanged: () => void
 }) {
@@ -69,11 +73,18 @@ export function PlaceSheet({
   // Keyed off placeId rather than synced in an effect: storing which place the
   // current mode belongs to lets the reset be derived at render, which avoids
   // a cascading second render every time a pin is tapped.
+  // Tracks which place the current mode belongs to. Cleared when the sheet
+  // closes, not just when the place changes: otherwise adding a place (which
+  // opens the form), closing, then tapping that same pin would reopen the form
+  // instead of the history, because placeId never changed.
   const [modeFor, setModeFor] = useState<string | null>(placeId)
   if (modeFor !== placeId) {
     setModeFor(placeId)
-    setMode("view")
-    setSnap(SNAP_POINTS[1])
+    setMode(openToLog ? "new" : "view")
+    // Straight to the tallest detent when logging: the form needs the room,
+    // and landing on a half-height sheet with the fields cut off is the kind
+    // of thing that makes a 15-second log take a minute.
+    setSnap(openToLog ? SNAP_POINTS[2] : SNAP_POINTS[1])
   }
 
   // Signed URLs expire, so they are fetched per sheet-open rather than stored.
@@ -106,7 +117,12 @@ export function PlaceSheet({
   return (
     <Drawer.Root
       open={open}
-      onOpenChange={(o) => !o && onClose()}
+      onOpenChange={(o) => {
+        if (!o) {
+          setModeFor(null)
+          onClose()
+        }
+      }}
       snapPoints={SNAP_POINTS}
       activeSnapPoint={snap}
       setActiveSnapPoint={setSnap}
@@ -168,7 +184,10 @@ export function PlaceSheet({
               desktop there is no obvious gesture at all. */}
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => {
+              setModeFor(null)
+              onClose()
+            }}
             aria-label="Close"
             className="text-text-dim hover:text-text absolute top-3 right-3 rounded-full p-1"
           >
