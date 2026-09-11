@@ -142,7 +142,8 @@ export function PlaceSheet({
     >
       <Drawer.Portal>
         <Drawer.Content
-          className="bg-surface border-line pointer-events-auto fixed inset-x-0 bottom-0 z-30 mx-auto flex h-[96dvh] max-w-md flex-col rounded-t-2xl border-t outline-none md:right-auto md:left-4 md:w-[380px]"
+          className="bg-surface border-line pointer-events-auto fixed inset-x-0 bottom-0 z-30 mx-auto flex h-[96dvh] max-w-md flex-col rounded-t-3xl border outline-none md:right-auto md:bottom-4 md:left-4 md:w-[380px] md:rounded-3xl"
+          style={{ boxShadow: "var(--shadow-float)" }}
           aria-describedby={undefined}
           // Without this, vaul steals focus back into the sheet on every
           // outside tap, which is what made the map unclickable even once the
@@ -178,7 +179,7 @@ export function PlaceSheet({
             }}
             className="mx-auto mt-3 shrink-0 cursor-grab px-6 py-2"
           >
-            <span className="bg-line block h-1.5 w-12 rounded-full" />
+            <span className="bg-line-strong block h-1.5 w-12 rounded-full" />
           </button>
 
           {/* Explicit close. Drag-to-dismiss is not discoverable, and on
@@ -304,7 +305,7 @@ export function PlaceSheet({
                       setMode("new")
                       setSnap(SNAP_POINTS[2])
                     }}
-                    className="bg-r-good text-text flex w-full items-center justify-center gap-2 rounded-full px-4 py-3 text-sm font-medium"
+                    className="bg-accent hover:bg-accent-hover flex w-full items-center justify-center gap-2 rounded-full px-4 py-3.5 text-sm font-medium text-white transition-all active:scale-[0.98]"
                   >
                     <Plus className="h-4 w-4" />
                     Log a visit
@@ -312,7 +313,7 @@ export function PlaceSheet({
 
                   <ul className="mt-5 space-y-3">
                     {shown?.visits.map((v) => (
-                      <li key={v.id} className="border-line rounded-xl border p-3">
+                      <li key={v.id} className="border-line bg-surface-raised/40 rounded-2xl border p-3.5 transition-colors">
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
                             <span className="text-text-dim text-xs">

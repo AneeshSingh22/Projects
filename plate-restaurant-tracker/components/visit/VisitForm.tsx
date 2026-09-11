@@ -240,14 +240,14 @@ export function VisitForm({
         />
       </div>
 
-      {error && <p className="text-r-good text-sm">{error}</p>}
+      {error && <p className="text-accent text-sm">{error}</p>}
 
       <div className="flex gap-2 pb-2">
         <button
           type="button"
           onClick={save}
           disabled={pending}
-          className="bg-r-good text-text flex-1 rounded-full px-4 py-3 text-sm font-medium disabled:opacity-50"
+          className="bg-accent hover:bg-accent-hover flex-1 rounded-full px-4 py-3.5 text-sm font-medium text-white transition-all active:scale-[0.98] disabled:opacity-50"
         >
           {pending ? "Saving…" : existing ? "Save changes" : "Log visit"}
         </button>
