@@ -189,7 +189,9 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
       </Map>
 
       {/* Overlays: siblings of the map, free to re-render and unmount. */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 p-4">
+      {/* Below the corner controls rather than level with them: at phone width
+          the two pills plus a centred bar cannot share a row without crowding. */}
+      <div className="pointer-events-none absolute inset-x-0 top-20 z-10 px-4">
         <div className="mx-auto max-w-md">
           <SearchPill onAdded={handleAdded} />
         </div>
@@ -227,12 +229,12 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
       {/* Storage total - section 9, Phase 4. Free tier is 1GB and knowing where
           you stand is the difference between noticing and being surprised. */}
       {/* Deals, top-left. A sibling of the map like every other overlay. */}
-      <div className="pointer-events-none absolute top-20 left-4 z-10 flex justify-start">
+      <div className="pointer-events-none absolute top-4 left-4 z-20 flex justify-start">
         <DealsPanel onSelectPlace={flyToPlace} />
       </div>
 
       {/* Counts panel. A sibling of the map like every other overlay. */}
-      <div className="pointer-events-none absolute top-20 right-4 z-10 flex justify-end">
+      <div className="pointer-events-none absolute top-4 right-4 z-20 flex justify-end">
         <CategoryPanel
           places={places}
           activeFilter={filter}
