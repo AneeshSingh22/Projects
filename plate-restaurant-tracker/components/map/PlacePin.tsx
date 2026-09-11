@@ -2,15 +2,18 @@
 
 import { AdvancedMarker } from "@vis.gl/react-google-maps"
 import { ratingColor, RATING_NONE, formatRating } from "@/lib/rating/ramp"
+import { CATEGORIES } from "@/lib/categories"
 import type { PlaceMarker } from "@/types/db"
 
-// Pins are coloured by rating, not status - colour has to carry information or
-// the ramp is decoration. Status decides the shape instead: an unrated wishlist
-// place is a hollow ring, anything rated is a filled teardrop with its score.
+// Pins carry two independent signals, deliberately on different channels:
 //
-// The teardrop shape matters more on a light map than it did on a dark one. A
-// plain circle reads as a generic map dot; a pin with a point reads as "someone
-// placed this here", which is exactly what these are.
+//   COLOUR = how good it was (the rating ramp)
+//   ICON   = what kind of place it is (the category)
+//
+// Keeping them separate is the point. Colour alone meant a green dot could be a
+// great restaurant, a great bar or a great basketball court, and at a glance
+// the map became a field of indistinguishable dots. Now the badge answers "what
+// is it" and the fill answers "was it good", and neither has to carry both jobs.
 export function PlacePin({
   place,
   selected,
@@ -22,13 +25,16 @@ export function PlacePin({
 }) {
   const rated = place.avg_rating != null
   const color = rated ? ratingColor(place.avg_rating) : RATING_NONE
+  const Icon = CATEGORIES[place.category].icon
   const size = selected ? 52 : 44
 
   return (
     <AdvancedMarker
       position={{ lat: place.lat, lng: place.lng }}
       title={
-        rated ? `${place.name} — ${formatRating(place.avg_rating!)}` : place.name
+        rated
+          ? `${place.name} — ${formatRating(place.avg_rating!)} · ${CATEGORIES[place.category].label}`
+          : `${place.name} — ${CATEGORIES[place.category].label}`
       }
       onClick={() => onSelect(place)}
       zIndex={selected ? 10 : 1}
@@ -59,21 +65,51 @@ export function PlacePin({
               strokeWidth={rated ? 2 : 3.5}
             />
           </svg>
-          {rated && (
+
+          {rated ? (
             <span
-              // Dark ink, not white. The fill is a rating colour tuned to read
-              // on a dark PANEL, and white on top of those measured as low as
-              // 2.63:1. Dark ink on the same fills measures 5.63:1 at worst.
+              // Dark ink, not white: these fills are tuned to read on a dark
+              // panel, and white on top of them measured as low as 2.63:1.
               className="text-ink relative font-bold tabular-nums"
               style={{
                 fontSize: selected ? 18 : 15,
                 lineHeight: 1,
-                // Nudged up: the glyph must sit in the round head of the
-                // teardrop, not in its point.
                 transform: "translateY(-14%)",
               }}
             >
               {formatRating(place.avg_rating!)}
+            </span>
+          ) : (
+            // Unrated places show the category icon in the head instead of a
+            // number, so a wishlist pin still says what kind of place it is.
+            <Icon
+              className="relative"
+              style={{
+                width: selected ? 18 : 15,
+                height: selected ? 18 : 15,
+                color,
+                transform: "translateY(-14%)",
+              }}
+            />
+          )}
+
+          {/* Category badge, top-right of the head. Small on purpose: a
+              secondary signal should be readable when looked for and ignorable
+              when not. */}
+          {rated && (
+            <span
+              className="bg-surface border-surface absolute grid place-items-center rounded-full border"
+              style={{
+                width: selected ? 20 : 17,
+                height: selected ? 20 : 17,
+                top: selected ? -1 : 0,
+                right: selected ? -1 : 0,
+              }}
+            >
+              <Icon
+                className="text-text"
+                style={{ width: selected ? 11 : 9, height: selected ? 11 : 9 }}
+              />
             </span>
           )}
         </div>
