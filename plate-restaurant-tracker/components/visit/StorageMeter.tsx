@@ -28,7 +28,10 @@ export function StorageMeter() {
   const pct = (total.bytes / FREE_TIER_BYTES) * 100
 
   return (
-    <div className="pointer-events-none absolute bottom-4 left-4 z-10">
+    // Above the What now button, which owns the bottom-left corner. Stacking
+    // rather than moving it elsewhere keeps the incidental information out of
+    // the corners the thumb actually uses.
+    <div className="pointer-events-none absolute bottom-20 left-4 z-10">
       <span className="bg-surface/80 border-line text-text-dim rounded-full border px-3 py-1.5 text-[11px] backdrop-blur-md">
         {total.count} photo{total.count === 1 ? "" : "s"} · {human(total.bytes)} ·{" "}
         {pct < 0.1 ? "<0.1" : pct.toFixed(1)}% of free tier
