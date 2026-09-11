@@ -6,6 +6,7 @@ import { logVisit, updateVisit, type VisitInput } from "@/app/actions/visits"
 import { QuickLog } from "./QuickLog"
 import type { Visit } from "@/types/db"
 import type { ParsedVisit } from "@/app/api/parse-visit/route"
+import { CATEGORIES, type PlaceCategory } from "@/lib/categories"
 
 function todayISO(): string {
   // Local date, not UTC. toISOString() would roll over to tomorrow for anyone
@@ -32,21 +33,34 @@ const field =
 // and never replaces this.
 export function VisitForm({
   placeId,
+  category,
   existing,
   onSaved,
   onCancel,
 }: {
   placeId: string
+  // Decides what the free-text detail field is called. Section 8 wants plain
+  // language, and "Dishes" on a basketball court reads as a bug.
+  category: PlaceCategory
   existing?: Visit
   onSaved: () => void
   onCancel: () => void
 }) {
+  const meta = CATEGORIES[category]
+  const isFood = category === "food_drink"
   const [visitedOn, setVisitedOn] = useState(existing?.visited_on ?? todayISO())
   const [rating, setRating] = useState<number | null>(
     existing?.rating != null ? Number(existing.rating) : 8,
   )
   const [notes, setNotes] = useState(existing?.notes ?? "")
-  const [dishes, setDishes] = useState((existing?.dishes ?? []).join(", "))
+  // One input, two columns. Food keeps the original `dishes` column so nothing
+  // already logged moves; other categories write to `activity`. Splitting the
+  // storage rather than renaming means no migration touches existing rows.
+  const [detail, setDetail] = useState(
+    (
+      (isFood ? existing?.dishes : existing?.activity) ?? []
+    ).join(", "),
+  )
   const [companions, setCompanions] = useState(
     (existing?.companions ?? []).join(", "),
   )
@@ -76,7 +90,7 @@ export function VisitForm({
     if (typeof parsed.rating === "number") {
       setRating(Math.min(10, Math.max(0, parsed.rating)))
     }
-    if (parsed.dishes?.length) setDishes(parsed.dishes.join(", "))
+    if (parsed.dishes?.length) setDetail(parsed.dishes.join(", "))
     if (parsed.companions?.length) setCompanions(parsed.companions.join(", "))
     if (typeof parsed.pricePaid === "number") setPrice(String(parsed.pricePaid))
     if (typeof parsed.wouldReturn === "boolean") setWouldReturn(parsed.wouldReturn)
@@ -91,7 +105,8 @@ export function VisitForm({
       visitedOn,
       rating,
       notes: notes.trim() || null,
-      dishes: splitList(dishes),
+      dishes: isFood ? splitList(detail) : [],
+      activity: isFood ? [] : splitList(detail),
       companions: splitList(companions),
       pricePaid: price.trim() ? Number(price) : null,
       wouldReturn,
@@ -145,14 +160,14 @@ export function VisitForm({
       </div>
 
       <div>
-        <label htmlFor="dishes" className="text-text-dim text-sm">
-          Dishes
+        <label htmlFor="detail" className="text-text-dim text-sm">
+          {meta.detailLabel}
         </label>
         <input
-          id="dishes"
-          value={dishes}
-          onChange={(e) => setDishes(e.target.value)}
-          placeholder="tonkotsu, gyoza"
+          id="detail"
+          value={detail}
+          onChange={(e) => setDetail(e.target.value)}
+          placeholder={meta.detailPlaceholder}
           className={`${field} mt-1`}
         />
       </div>
