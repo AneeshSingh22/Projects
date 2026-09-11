@@ -130,8 +130,24 @@ export function PlaceSheet({
           // Without this, vaul steals focus back into the sheet on every
           // outside tap, which is what made the map unclickable even once the
           // overlay was gone.
-          onInteractOutside={(e) => e.preventDefault()}
-          onPointerDownOutside={(e) => e.preventDefault()}
+          // Keeping the sheet open when the user taps elsewhere is what makes
+          // the map usable behind it. But preventDefault here swallows the
+          // pointer event entirely, which also killed clicks on the photo
+          // lightbox - that is portalled to document.body, so it counts as
+          // "outside" the sheet.
+          //
+          // So: stop the sheet from closing, but let the event itself reach
+          // whatever was actually clicked.
+          onInteractOutside={(e) => {
+            const target = e.target as HTMLElement | null
+            if (target?.closest("[data-plate-overlay]")) return
+            e.preventDefault()
+          }}
+          onPointerDownOutside={(e) => {
+            const target = e.target as HTMLElement | null
+            if (target?.closest("[data-plate-overlay]")) return
+            e.preventDefault()
+          }}
         >
           {/* Drag handle. Also cycles detents on tap: dragging is fiddly with
               a trackpad, and on a phone a tap target is more reliable than a
