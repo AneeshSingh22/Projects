@@ -26,27 +26,26 @@
 
 export type Rgb = [number, number, number]
 
-// Every stop clears WCAG AA (4.5:1) both as a numeral on a light panel and as
-// white text inside a filled pin, checked numerically rather than by eye.
+// Two different contrast problems, because these colours appear in two places.
 //
-// REVISED for the light palette. The previous stops were tuned to glow against
-// a dark #172427 surface and failed at every single stop on paper - worst
-// 2.57:1. On a light ground the ramp has to get DARKER to stay readable, which
-// is the opposite of the intuition that "better should be brighter".
+// On a PANEL the ramp sits on dark #172427, so it needs to be light enough to
+// read - worst stop here is 4.90:1.
 //
-// The hue story is unchanged from section 8's revision: muted grey recedes for
-// places you did not rate highly, amber for the middle, green for the best, so
-// the map can be scanned for somewhere good at a glance.
+// Inside a PIN the same colour is a fill sitting on the LIGHT map, and the
+// number on top of it must read against the fill. White numerals measured just
+// 2.63:1 on the amber and green stops, so pins use dark ink instead, which
+// measures 5.63:1 at worst. Same ramp, opposite text colour, for the same
+// reason: contrast is always against whatever is actually behind the glyph.
 const STOPS: { at: number; rgb: Rgb }[] = [
-  { at: 0, rgb: [101, 114, 118] },  // muted slate: bad, and quiet about it
-  { at: 4, rgb: [88, 102, 106] },   // still receding
-  { at: 6, rgb: [146, 96, 16] },    // amber: acceptable
-  { at: 8, rgb: [74, 124, 58] },    // green: good
-  { at: 10, rgb: [42, 102, 52] },   // deep green: the best places
+  { at: 0, rgb: [126, 146, 152] },  // muted slate: bad, and quiet about it
+  { at: 4, rgb: [138, 156, 161] },  // still receding
+  { at: 6, rgb: [201, 151, 63] },   // amber: acceptable
+  { at: 8, rgb: [116, 168, 92] },   // green: good
+  { at: 10, rgb: [101, 176, 108] }, // brighter green: the best places
 ]
 
 // Wishlist: no rating yet, so no position on the ramp at all.
-export const RATING_NONE = "#8A9598"
+export const RATING_NONE = "#6E8489"
 
 function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t

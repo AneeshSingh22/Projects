@@ -129,44 +129,42 @@
   }
 }
 /* ==========================================================================
-   Plate design tokens.
+   Plate design tokens - plan.md section 8.
 
-   REVISED: this palette was originally dark, per plan.md section 8, on the
-   assumption of a dark desaturated map style applied at the Map ID. That style
-   was never applied, so dark panels were floating on Google's bright default
-   map - two designs in one viewport, which no amount of component polish
-   fixes.
+   Dark panels on a light map, deliberately. A brief light-panel version was
+   tried and was worse: light cards on a light map have no edge to sit against,
+   so they dissolve into the background. Dark cards read as intentional - the
+   same treatment Google's own map UI uses - and give the pins something to pop
+   against.
 
-   Rather than depend on console work, the app now commits to light. Section
-   8's actual intent is preserved: warm rather than clinical, quiet
-   surroundings, one loud element. Warm paper whites, not pure white - a #FFF
-   panel on a grey-green map reads as a hole punched in the screen.
-
-   Every pairing below was checked numerically against WCAG AA rather than by
-   eye. See the rating ramp in lib/rating/ramp.ts for the same treatment.
+   Every pairing below is checked numerically against WCAG AA rather than by
+   eye, including the rating ramp both as a numeral on a panel and as text
+   inside a pin, which sits on the LIGHT map and therefore needs the opposite
+   treatment.
    ========================================================================== */
 
 @theme {
-  /* Surfaces */
-  --color-ink: #e8e4dd;          /* map surround / deepest layer */
-  --color-surface: #fffcf8;      /* panels, sheets, cards */
-  --color-surface-raised: #f4efe8; /* inputs, chips */
-  --color-line: #e0d8cd;         /* hairlines */
-  --color-line-strong: #cdc2b4;  /* borders that need to read as edges */
-  --color-text: #1a2427;         /* 15.49:1 on surface */
-  --color-text-dim: #5e6e72;     /* 5.20:1 on surface */
+  /* Surfaces. Deep blue-green rather than black: a black card under a map
+     reads as a dead screen, where the teal cast reads as dusk. */
+  --color-ink: #0e1618;
+  --color-surface: #172427;
+  --color-surface-raised: #1f3034;
+  --color-line: #2c4247;
+  --color-line-strong: #3d565c;
+  --color-text: #ede8e0;          /* 13.06:1 on surface */
+  --color-text-dim: #93a6a9;      /*  6.27:1 on surface */
 
-  /* Rating ramp - grey to amber to green, darkened for a light ground.
-     The dark-tuned version failed AA at every stop here, worst 2.57:1. */
-  --color-r-none: #8a9598;
-  --color-r-low: #657276;
-  --color-r-mid: #926010;
-  --color-r-good: #4a7c3a;
-  --color-r-top: #2a6634;
+  /* Rating ramp: muted slate recedes, amber for the middle, green for the
+     best, so the map can be scanned for somewhere good at a glance. */
+  --color-r-none: #6e8489;
+  --color-r-low: #7e9298;
+  --color-r-mid: #c9973f;
+  --color-r-good: #74a85c;
+  --color-r-top: #65b06c;
 
-  /* The one saturated accent, used for primary actions only. */
-  --color-accent: #b8461f;
-  --color-accent-hover: #9e3a18;
+  /* One saturated accent for primary actions. */
+  --color-accent: #d2542e;
+  --color-accent-hover: #e0623b;
 
   --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
 
@@ -178,11 +176,12 @@
   --text-xl: 1.75rem;
   --text-rating: 3.5rem;
 
-  /* Layered shadows rather than one flat blur. Two shadows - a tight contact
-     shadow plus a wide ambient one - is most of what makes a floating panel
-     read as physically above the map rather than pasted onto it. */
-  --shadow-panel: 0 1px 2px rgb(26 36 39 / 0.08), 0 8px 24px -4px rgb(26 36 39 / 0.12);
-  --shadow-float: 0 2px 4px rgb(26 36 39 / 0.10), 0 16px 40px -8px rgb(26 36 39 / 0.20);
+  /* Two layered shadows - a tight contact shadow plus a wide ambient one - is
+     most of what makes a floating panel read as physically above the map
+     rather than pasted onto it. Deeper here than on light, because a dark card
+     on a light ground casts a more visible shadow in reality. */
+  --shadow-panel: 0 1px 2px rgb(14 22 24 / 0.20), 0 8px 24px -4px rgb(14 22 24 / 0.35);
+  --shadow-float: 0 2px 6px rgb(14 22 24 / 0.28), 0 18px 44px -10px rgb(14 22 24 / 0.50);
 }
 
 /* The map is full-bleed behind everything, so the document must not scroll or
