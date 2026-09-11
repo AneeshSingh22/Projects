@@ -106,7 +106,8 @@ export function AskChat({
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Ask about your places"
-        className="bg-surface border-line text-text pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full border shadow-2xl backdrop-blur-md transition-transform active:scale-95"
+        className="bg-accent hover:bg-accent-hover pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full text-white transition-all duration-200 ease-out active:scale-95"
+        style={{ boxShadow: "var(--shadow-float)" }}
       >
         <Sparkles className="h-5 w-5" />
       </button>
@@ -114,11 +115,16 @@ export function AskChat({
   }
 
   return (
-    <div className="bg-surface/95 border-line pointer-events-auto flex h-[70dvh] max-h-[560px] w-[min(92vw,380px)] flex-col overflow-hidden rounded-3xl border shadow-2xl backdrop-blur-xl duration-200 animate-in fade-in slide-in-from-bottom-4">
-      <header className="border-line flex shrink-0 items-center justify-between border-b px-4 py-3">
-        <span className="flex items-center gap-2">
-          <Sparkles className="text-text h-4 w-4" />
-          <span className="font-display text-text text-sm">Ask</span>
+    <div
+      className="bg-surface/97 border-line pointer-events-auto flex h-[70dvh] max-h-[560px] w-[min(92vw,380px)] flex-col overflow-hidden rounded-3xl border backdrop-blur-2xl duration-300 ease-out animate-in fade-in slide-in-from-bottom-6"
+      style={{ boxShadow: "var(--shadow-float)" }}
+    >
+      <header className="border-line flex shrink-0 items-center justify-between border-b px-4 py-3.5">
+        <span className="flex items-center gap-2.5">
+          <span className="bg-accent/10 text-accent grid h-7 w-7 place-items-center rounded-full">
+            <Sparkles className="h-3.5 w-3.5" />
+          </span>
+          <span className="font-display text-text text-base leading-none">Ask</span>
         </span>
         <button
           type="button"
@@ -128,17 +134,17 @@ export function AskChat({
             onClear()
           }}
           aria-label="Close"
-          className="text-text-dim hover:text-text rounded-full p-1"
+          className="text-text-dim hover:text-text hover:bg-surface-raised rounded-full p-1.5 transition-colors"
         >
           <X className="h-4 w-4" />
         </button>
       </header>
 
-      <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto overscroll-contain px-4 py-3">
+      <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-4">
         {turns.length === 0 && (
           <div className="space-y-3 pt-2">
-            <p className="text-text-dim text-sm">
-              Ask about anywhere you have been or want to go.
+            <p className="text-text text-sm leading-relaxed">
+              Ask about anywhere you have been, or anywhere you still want to go.
             </p>
             <div className="flex flex-col gap-2">
               {EXAMPLES.map((ex) => (
@@ -146,7 +152,7 @@ export function AskChat({
                   key={ex}
                   type="button"
                   onClick={() => ask(ex)}
-                  className="border-line text-text-dim hover:text-text hover:border-text-dim rounded-xl border px-3 py-2 text-left text-xs transition-colors"
+                  className="border-line bg-surface-raised/60 text-text-dim hover:text-text hover:border-line-strong hover:bg-surface-raised rounded-xl border px-3.5 py-2.5 text-left text-xs transition-all duration-150"
                 >
                   {ex}
                 </button>
@@ -158,7 +164,7 @@ export function AskChat({
         {turns.map((turn, i) =>
           turn.role === "you" ? (
             <div key={i} className="flex justify-end">
-              <p className="bg-surface-raised text-text max-w-[85%] rounded-2xl rounded-br-md px-3 py-2 text-sm">
+              <p className="bg-accent max-w-[85%] rounded-2xl rounded-br-md px-3.5 py-2 text-sm text-white">
                 {turn.text}
               </p>
             </div>
@@ -177,7 +183,7 @@ export function AskChat({
                   Nothing matches that yet.
                 </p>
               ) : (
-                <ul className="border-line overflow-hidden rounded-xl border">
+                <ul className="border-line bg-surface-raised/40 overflow-hidden rounded-xl border">
                   {turn.results.map(({ place, distanceKm }) => {
                     const Icon = CATEGORIES[place.category].icon
                     return (
@@ -185,7 +191,7 @@ export function AskChat({
                         <button
                           type="button"
                           onClick={() => onSelectPlace(place)}
-                          className="hover:bg-surface-raised border-line flex w-full items-center gap-2.5 border-b px-3 py-2.5 text-left last:border-b-0 transition-colors"
+                          className="hover:bg-surface-raised border-line flex w-full items-center gap-3 border-b px-3.5 py-3 text-left last:border-b-0 transition-colors"
                         >
                           <Icon className="text-text-dim h-3.5 w-3.5 shrink-0" />
                           <span className="min-w-0 flex-1">
@@ -237,7 +243,7 @@ export function AskChat({
           e.preventDefault()
           ask(draft)
         }}
-        className="border-line flex shrink-0 items-center gap-2 border-t px-3 py-3"
+        className="border-line bg-surface/80 flex shrink-0 items-center gap-2 border-t px-3.5 py-3 backdrop-blur-sm"
       >
         <input
           ref={inputRef}
@@ -251,7 +257,7 @@ export function AskChat({
           type="submit"
           disabled={!draft.trim() || busy}
           aria-label="Send"
-          className="bg-text text-ink flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-opacity disabled:opacity-30"
+          className="bg-accent hover:bg-accent-hover flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white transition-all duration-150 active:scale-90 disabled:opacity-25"
         >
           <ArrowUp className="h-4 w-4" />
         </button>

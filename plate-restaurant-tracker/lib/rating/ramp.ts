@@ -26,24 +26,27 @@
 
 export type Rgb = [number, number, number]
 
-// Every stop clears WCAG AA (4.5:1) against --surface #172427, checked
-// numerically rather than by eye - section 9 requires a contrast check on this
-// ramp specifically, and ratings appear at body size in the visit list as well
-// as at 56px in the sheet.
+// Every stop clears WCAG AA (4.5:1) both as a numeral on a light panel and as
+// white text inside a filled pin, checked numerically rather than by eye.
 //
-// The top stop was originally a deeper green, rgb(45,122,62), which measured
-// 3.01:1. That passes for large text and fails for body text, so a 10 would
-// have been the least readable rating on the scale - exactly backwards.
+// REVISED for the light palette. The previous stops were tuned to glow against
+// a dark #172427 surface and failed at every single stop on paper - worst
+// 2.57:1. On a light ground the ramp has to get DARKER to stay readable, which
+// is the opposite of the intuition that "better should be brighter".
+//
+// The hue story is unchanged from section 8's revision: muted grey recedes for
+// places you did not rate highly, amber for the middle, green for the best, so
+// the map can be scanned for somewhere good at a glance.
 const STOPS: { at: number; rgb: Rgb }[] = [
-  { at: 0, rgb: [126, 146, 152] }, // muted grey-blue: bad, and quiet about it
-  { at: 4, rgb: [138, 156, 161] }, // still receding
-  { at: 6, rgb: [201, 151, 63] }, // amber: acceptable
-  { at: 8, rgb: [116, 168, 92] }, // green: good
-  { at: 10, rgb: [101, 176, 108] }, // brighter green: the best places
+  { at: 0, rgb: [101, 114, 118] },  // muted slate: bad, and quiet about it
+  { at: 4, rgb: [88, 102, 106] },   // still receding
+  { at: 6, rgb: [146, 96, 16] },    // amber: acceptable
+  { at: 8, rgb: [74, 124, 58] },    // green: good
+  { at: 10, rgb: [42, 102, 52] },   // deep green: the best places
 ]
 
 // Wishlist: no rating yet, so no position on the ramp at all.
-export const RATING_NONE = "#6E8489"
+export const RATING_NONE = "#8A9598"
 
 function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t

@@ -31,9 +31,10 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  // Matches --color-ink, so the iOS status bar blends into the map surround
-  // instead of sitting on a white band.
-  themeColor: "#0e1618",
+  // Matches --color-surface. The palette moved from dark to light, and a
+  // leftover dark status bar would read as a stray black stripe above a light
+  // app.
+  themeColor: "#fffcf8",
   // The map is full-bleed; letting the user zoom the document would let them
   // pinch the UI chrome off screen.
   maximumScale: 1,
@@ -47,7 +48,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${fraunces.variable} h-full antialiased`}
     >
-      <body className="bg-ink text-text min-h-full font-sans">
+      <body className="bg-ink text-text min-h-full font-sans antialiased">
         {/* plan.md section 5, Rule 1: the provider wraps everything and never
             unmounts, so the Maps script is fetched once per session. It sits
             above {children} so client-side navigation cannot tear it down. */}
