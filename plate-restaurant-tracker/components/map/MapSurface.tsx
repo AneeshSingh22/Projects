@@ -14,6 +14,7 @@ import { CategoryPanel } from "./CategoryPanel"
 import { AskChat } from "./AskChat"
 import { DealsPanel } from "@/components/deals/DealsPanel"
 import { WhatNow } from "@/components/suggest/WhatNow"
+import { StatsPanel } from "@/components/stats/StatsPanel"
 import { UserLocation } from "./UserLocation"
 import { useLocation } from "@/lib/location/useLocation"
 import { LocateFixed, Loader2 } from "lucide-react"
@@ -218,7 +219,10 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
         }`}
       >
         <div className="flex items-start gap-3">
-          <DealsPanel onSelectPlace={flyToPlace} />
+          <div className="flex items-start gap-2">
+            <DealsPanel onSelectPlace={flyToPlace} />
+            <StatsPanel onSelectPlace={flyToPlace} />
+          </div>
 
           {/* Hidden on phones, where it lives in the row below instead. */}
           <div className="hidden min-w-0 flex-1 justify-center sm:flex">
