@@ -10,6 +10,7 @@ import {
 } from "@/lib/deals/active"
 import { distanceKm } from "@/lib/search/apply"
 import type { DealWithPlace, PlaceMarker } from "@/types/db"
+import { useLocation } from "@/lib/location/useLocation"
 
 // Deals you have logged, filtered to what is running right now.
 //
@@ -23,7 +24,10 @@ export function DealsPanel({
 }) {
   const [open, setOpen] = useState(false)
   const [deals, setDeals] = useState<DealWithPlace[] | null>(null)
+  // Shared with the blue dot, What now and Ask - one permission prompt for the
+  // whole app rather than one per panel.
   const [origin, setOrigin] = useState<{ lat: number; lng: number } | null>(null)
+  const { once } = useLocation(false)
   // Re-evaluated on a timer so a happy hour starting at 4pm appears without a
   // reload. A minute is granular enough for something measured in hours.
   const [tick, setTick] = useState(0)
@@ -36,13 +40,15 @@ export function DealsPanel({
   }, [open])
 
   useEffect(() => {
-    if (!open || !navigator.geolocation) return
-    navigator.geolocation.getCurrentPosition(
-      (p) => setOrigin({ lat: p.coords.latitude, lng: p.coords.longitude }),
-      () => setOrigin(null),
-      { timeout: 6000, maximumAge: 300_000 },
-    )
-  }, [open])
+    if (!open) return
+    let cancelled = false
+    once().then((o) => {
+      if (!cancelled) setOrigin(o)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [open, once])
 
   const { live, upcoming } = useMemo(() => {
     void tick

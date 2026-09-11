@@ -7,6 +7,7 @@ import { applyFilters, type SearchResult } from "@/lib/search/apply"
 import { ratingColor, formatRating, RATING_NONE } from "@/lib/rating/ramp"
 import { CATEGORIES } from "@/lib/categories"
 import type { PlaceMarker } from "@/types/db"
+import { useLocation } from "@/lib/location/useLocation"
 
 type Turn =
   | { role: "you"; text: string }
@@ -39,6 +40,7 @@ export function AskChat({
   const [busy, setBusy] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const { once } = useLocation(false)
 
   // Keep the newest turn in view as the conversation grows.
   useEffect(() => {
@@ -60,7 +62,7 @@ export function AskChat({
 
     try {
       const wantsNearby = /\b(near|nearby|around here|close|walking)\b/i.test(q)
-      const origin = wantsNearby ? await currentPosition() : null
+      const origin = wantsNearby ? await once() : null
 
       const [res, places] = await Promise.all([
         fetch("/api/ask", {
@@ -264,18 +266,4 @@ export function AskChat({
       </form>
     </div>
   )
-}
-
-// Wrapped because the browser API is callback-based and rejects loudly when
-// permission is denied. A refusal should quietly drop distance sorting, not
-// fail the question.
-function currentPosition(): Promise<{ lat: number; lng: number } | null> {
-  return new Promise((resolve) => {
-    if (!navigator.geolocation) return resolve(null)
-    navigator.geolocation.getCurrentPosition(
-      (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
-      () => resolve(null),
-      { timeout: 6000, maximumAge: 60_000 },
-    )
-  })
 }

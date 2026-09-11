@@ -8,6 +8,7 @@ import { suggest, type Suggestion } from "@/lib/suggest/score"
 import { CATEGORIES } from "@/lib/categories"
 import { ratingColor, formatRating, RATING_NONE } from "@/lib/rating/ramp"
 import type { PlaceMarker } from "@/types/db"
+import { useLocation } from "@/lib/location/useLocation"
 
 // "What should I do right now?" - one tap, one answer, with its reasoning
 // attached.
@@ -26,11 +27,14 @@ export function WhatNow({
   const [busy, setBusy] = useState(false)
   const [seen, setSeen] = useState<Set<string>>(new Set())
   const [noLocation, setNoLocation] = useState(false)
+  // Shared with the blue dot and the Ask panel, so there is one permission
+  // prompt for the whole app rather than one per feature.
+  const { once } = useLocation(false)
 
   async function run(fresh: boolean) {
     setBusy(true)
     try {
-      const origin = await currentPosition()
+      const origin = await once()
       setNoLocation(origin == null)
 
       const [places, deals] = await Promise.all([
@@ -191,15 +195,4 @@ export function WhatNow({
       </div>
     </div>
   )
-}
-
-function currentPosition(): Promise<{ lat: number; lng: number } | null> {
-  return new Promise((resolve) => {
-    if (!navigator.geolocation) return resolve(null)
-    navigator.geolocation.getCurrentPosition(
-      (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
-      () => resolve(null),
-      { timeout: 6000, maximumAge: 120_000 },
-    )
-  })
 }
