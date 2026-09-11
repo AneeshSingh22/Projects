@@ -11,7 +11,7 @@ import { PlaceSheet } from "@/components/visit/PlaceSheet"
 import { StorageMeter } from "@/components/visit/StorageMeter"
 import { OfflineBanner } from "@/components/pwa/OfflineBanner"
 import { CategoryPanel } from "./CategoryPanel"
-import { AskBar } from "./AskBar"
+import { AskChat } from "./AskChat"
 import { MapController } from "./MapController"
 import type { PlaceCategory } from "@/lib/categories"
 import { getPlaces } from "@/app/actions/refresh"
@@ -71,7 +71,15 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
   // question is active, which is different from a question that matched
   // nothing - that case must show an empty map, not every pin.
   const [askIds, setAskIds] = useState<string[] | null>(null)
-  const [mode, setMode] = useState<"add" | "ask">("add")
+
+
+  // Used when a question resolves to one place: move the map there AND open
+  // the sheet, rather than leaving the user to find the pin themselves.
+  const flyToPlace = useCallback((p: PlaceMarker) => {
+    setPanTo({ lat: p.lat, lng: p.lng })
+    setSelectedId(p.id)
+    setOpenToLog(false)
+  }, [])
 
   const handleAdded = useCallback(
     (place: PlaceMarker, alreadyExisted: boolean, thenLog = false) => {
@@ -182,42 +190,7 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
       {/* Overlays: siblings of the map, free to re-render and unmount. */}
       <div className="pointer-events-none absolute inset-x-0 top-0 z-10 p-4">
         <div className="mx-auto max-w-md">
-          {/* Two jobs, one slot: adding a new place, and asking about the ones
-              you have. Kept as a toggle rather than two bars so the map is not
-              squeezed by permanent chrome. */}
-          <div className="pointer-events-auto mb-2 flex justify-center gap-1">
-            {(["add", "ask"] as const).map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => {
-                  setMode(m)
-                  if (m === "add") setAskIds(null)
-                }}
-                className={`rounded-full border px-3 py-1 text-xs backdrop-blur-md transition-colors ${
-                  mode === m
-                    ? "bg-surface border-line text-text"
-                    : "bg-surface/60 border-line text-text-dim"
-                }`}
-              >
-                {m === "add" ? "Add a place" : "Ask"}
-              </button>
-            ))}
-          </div>
-
-          {mode === "add" ? (
-            <SearchPill onAdded={handleAdded} />
-          ) : (
-            <AskBar
-              onResults={setAskIds}
-              onClear={() => setAskIds(null)}
-              onSelectPlace={(p) => {
-                setPanTo({ lat: p.lat, lng: p.lng })
-                setSelectedId(p.id)
-                setOpenToLog(false)
-              }}
-            />
-          )}
+          <SearchPill onAdded={handleAdded} />
         </div>
       </div>
 
@@ -263,6 +236,18 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
             setSelectedId(p.id)
             setOpenToLog(false)
           }}
+        />
+      </div>
+
+      {/* Ask, bottom-right. Its own surface rather than sharing the search
+          bar: adding a place and interrogating the ones you have are different
+          jobs, and overloading one input made both less obvious. */}
+      <div className="absolute right-4 bottom-4 z-20 flex flex-col items-end">
+        <AskChat
+          onResults={setAskIds}
+          onClear={() => setAskIds(null)}
+          onSelectPlace={flyToPlace}
+          onFlyTo={flyToPlace}
         />
       </div>
 
