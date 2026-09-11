@@ -114,7 +114,10 @@ export function SearchPill({
 
   return (
     <div className="pointer-events-auto w-full">
-      <div className="bg-surface/90 border-line flex items-center gap-2 rounded-full border px-4 py-3 shadow-lg backdrop-blur-md">
+      <div
+        className="bg-surface/95 border-line flex items-center gap-2.5 rounded-full border px-4 py-3 backdrop-blur-xl transition-shadow"
+        style={{ boxShadow: "var(--shadow-panel)" }}
+      >
         {busy ? (
           <Loader2 className="text-text-dim h-4 w-4 shrink-0 animate-spin" />
         ) : (
@@ -152,7 +155,10 @@ export function SearchPill({
       </div>
 
       {open && (visibleSuggestions.length > 0 || error) && (
-        <ul className="bg-surface/95 border-line mt-2 overflow-hidden rounded-2xl border shadow-lg backdrop-blur-md">
+        <ul
+          className="bg-surface/97 border-line mt-2 overflow-hidden rounded-2xl border backdrop-blur-xl duration-200 animate-in fade-in slide-in-from-top-2"
+          style={{ boxShadow: "var(--shadow-panel)" }}
+        >
           {error && <li className="text-r-good px-4 py-3 text-sm">{error}</li>}
           {visibleSuggestions.map((s) => (
             <li key={s.placeId}>
@@ -160,7 +166,7 @@ export function SearchPill({
                 type="button"
                 onClick={() => choose(s)}
                 disabled={pending}
-                className="hover:bg-surface-raised border-line block w-full border-b px-4 py-3 text-left last:border-b-0 disabled:opacity-50"
+                className="hover:bg-surface-raised border-line block w-full border-b px-4 py-3 text-left transition-colors last:border-b-0 disabled:opacity-50"
               >
                 <span className="text-text block text-sm">{s.primary}</span>
                 {s.secondary && (

@@ -45,7 +45,8 @@ export function CategoryPanel({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="bg-surface/90 border-line text-text pointer-events-auto rounded-full border px-3 py-2 text-xs shadow-lg backdrop-blur-md"
+        className="bg-surface/95 border-line text-text hover:border-line-strong pointer-events-auto rounded-full border px-3.5 py-2 text-xs backdrop-blur-xl transition-all"
+        style={{ boxShadow: "var(--shadow-panel)" }}
       >
         {total} place{total === 1 ? "" : "s"}
       </button>
@@ -55,7 +56,10 @@ export function CategoryPanel({
   const list = expanded ? grouped[expanded] : null
 
   return (
-    <div className="bg-surface/95 border-line pointer-events-auto w-60 overflow-hidden rounded-2xl border shadow-lg backdrop-blur-md">
+    <div
+      className="bg-surface/97 border-line pointer-events-auto w-64 overflow-hidden rounded-2xl border backdrop-blur-xl duration-200 animate-in fade-in slide-in-from-top-2"
+      style={{ boxShadow: "var(--shadow-panel)" }}
+    >
       <div className="border-line flex items-center justify-between border-b px-3 py-2">
         {expanded ? (
           <button
@@ -93,7 +97,7 @@ export function CategoryPanel({
                   <button
                     type="button"
                     onClick={() => onSelectPlace(p)}
-                    className="hover:bg-surface-raised border-line flex w-full items-center justify-between gap-2 border-b px-3 py-2.5 text-left last:border-b-0"
+                    className="hover:bg-surface-raised border-line flex w-full items-center justify-between gap-2 border-b px-3.5 py-3 text-left transition-colors last:border-b-0"
                   >
                     <span className="text-text truncate text-sm">{p.name}</span>
                     <span
@@ -124,7 +128,7 @@ export function CategoryPanel({
                     <button
                       type="button"
                       onClick={() => setExpanded(c)}
-                      className="hover:bg-surface-raised flex flex-1 items-center gap-2 px-3 py-2.5 text-left"
+                      className="hover:bg-surface-raised flex flex-1 items-center gap-2.5 px-3.5 py-3 text-left transition-colors"
                     >
                       <Icon className="text-text-dim h-4 w-4 shrink-0" />
                       <span className="text-text flex-1 truncate text-sm">

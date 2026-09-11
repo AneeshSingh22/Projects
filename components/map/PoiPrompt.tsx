@@ -103,9 +103,10 @@ export function PoiPrompt({
 
   return (
     <div className="pointer-events-auto absolute inset-x-0 bottom-0 z-20 p-4">
-      <div className="bg-surface border-line mx-auto max-w-md rounded-2xl border p-4 shadow-2xl">
+      <div className="bg-surface/97 border-line mx-auto max-w-md rounded-3xl border p-4 backdrop-blur-xl duration-200 animate-in fade-in slide-in-from-bottom-4"
+        style={{ boxShadow: "var(--shadow-float)" }}>
         {error ? (
-          <p className="text-r-good text-sm">{error}</p>
+          <p className="text-accent text-sm">{error}</p>
         ) : (
           <>
             <p className="font-display text-text text-lg leading-tight">
@@ -122,7 +123,7 @@ export function PoiPrompt({
             type="button"
             onClick={() => add(true)}
             disabled={pending || !name}
-            className="bg-r-good text-text w-full rounded-full px-4 py-2.5 text-sm font-medium disabled:opacity-50"
+            className="bg-accent hover:bg-accent-hover w-full rounded-full px-4 py-3 text-sm font-medium text-white transition-all active:scale-[0.98] disabled:opacity-50"
           >
             {pending ? "Adding…" : `${meta.visitedVerb} — log a visit`}
           </button>
