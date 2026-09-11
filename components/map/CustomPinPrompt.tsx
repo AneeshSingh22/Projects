@@ -49,7 +49,8 @@ export function CustomPinPrompt({
 
   return (
     <div className="pointer-events-auto absolute inset-x-0 bottom-0 z-20 p-4">
-      <div className="bg-surface border-line mx-auto max-w-md rounded-2xl border p-4 shadow-2xl">
+      <div className="bg-surface/97 border-line mx-auto max-w-md rounded-3xl border p-4 backdrop-blur-xl duration-200 animate-in fade-in slide-in-from-bottom-4"
+        style={{ boxShadow: "var(--shadow-float)" }}>
         <p className="text-text-dim text-xs">
           Dropped at {candidate.lat.toFixed(5)}, {candidate.lng.toFixed(5)}
         </p>
@@ -66,13 +67,13 @@ export function CustomPinPrompt({
           placeholder="What is this place called?"
           className="bg-surface-raised border-line text-text placeholder:text-text-dim mt-3 w-full rounded-xl border px-3 py-2.5 text-base outline-none"
         />
-        {error && <p className="text-r-good mt-2 text-sm">{error}</p>}
+        {error && <p className="text-accent mt-2 text-sm">{error}</p>}
         <div className="mt-4 space-y-2">
           <button
             type="button"
             onClick={() => save(true)}
             disabled={pending}
-            className="bg-r-good text-text w-full rounded-full px-4 py-2.5 text-sm font-medium disabled:opacity-50"
+            className="bg-accent hover:bg-accent-hover w-full rounded-full px-4 py-3 text-sm font-medium text-white transition-all active:scale-[0.98] disabled:opacity-50"
           >
             {/* A hand-dropped pin has no Google type to categorise from, so
                 this stays generic rather than guessing wrong. */}

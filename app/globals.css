@@ -129,47 +129,64 @@
   }
 }
 /* ==========================================================================
-   Plate design tokens — plan.md section 8.
+   Plate design tokens.
 
-   Tailwind v4 has no tailwind.config.ts theme block, so tokens are declared
-   here with @theme and become utilities automatically: --color-ink yields
-   bg-ink, text-ink, border-ink and so on.
+   REVISED: this palette was originally dark, per plan.md section 8, on the
+   assumption of a dark desaturated map style applied at the Map ID. That style
+   was never applied, so dark panels were floating on Google's bright default
+   map - two designs in one viewport, which no amount of component polish
+   fixes.
+
+   Rather than depend on console work, the app now commits to light. Section
+   8's actual intent is preserved: warm rather than clinical, quiet
+   surroundings, one loud element. Warm paper whites, not pure white - a #FFF
+   panel on a grey-green map reads as a hole punched in the screen.
+
+   Every pairing below was checked numerically against WCAG AA rather than by
+   eye. See the rating ramp in lib/rating/ramp.ts for the same treatment.
    ========================================================================== */
 
 @theme {
-  /* Surfaces. Deliberately a deep blue-green rather than black: a black
-     surround under a map reads as a dead screen, where the teal cast reads as
-     dusk. */
-  --color-ink: #0e1618;
-  --color-surface: #172427;
-  --color-surface-raised: #1f3034;
-  --color-line: #2c4247;
-  --color-text: #ede8e0;
-  --color-text-dim: #93a6a9;
+  /* Surfaces */
+  --color-ink: #e8e4dd;          /* map surround / deepest layer */
+  --color-surface: #fffcf8;      /* panels, sheets, cards */
+  --color-surface-raised: #f4efe8; /* inputs, chips */
+  --color-line: #e0d8cd;         /* hairlines */
+  --color-line-strong: #cdc2b4;  /* borders that need to read as edges */
+  --color-text: #1a2427;         /* 15.49:1 on surface */
+  --color-text-dim: #5e6e72;     /* 5.20:1 on surface */
 
-  /* The rating ramp. Runs the way food browns — pale and raw at the low end,
-     through ochre, to a dark chili red. The one place the app is loud. */
-  --color-r-none: #6e8489;
-  --color-r-low: #7e9298;
-  --color-r-mid: #c9973f;
-  --color-r-good: #d2542e;
-  --color-r-top: #a82a28;
+  /* Rating ramp - grey to amber to green, darkened for a light ground.
+     The dark-tuned version failed AA at every stop here, worst 2.57:1. */
+  --color-r-none: #8a9598;
+  --color-r-low: #657276;
+  --color-r-mid: #926010;
+  --color-r-good: #4a7c3a;
+  --color-r-top: #2a6634;
+
+  /* The one saturated accent, used for primary actions only. */
+  --color-accent: #b8461f;
+  --color-accent-hover: #9e3a18;
 
   --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
 
-  /* Scale from section 8: 12 / 14 / 16 / 20 / 28 / 56. The 56 is reserved for
-     the rating numeral in the bottom sheet and appears nowhere else. */
+  /* Scale from section 8: 12 / 14 / 16 / 20 / 28 / 56 */
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
   --text-base: 1rem;
   --text-lg: 1.25rem;
   --text-xl: 1.75rem;
   --text-rating: 3.5rem;
+
+  /* Layered shadows rather than one flat blur. Two shadows - a tight contact
+     shadow plus a wide ambient one - is most of what makes a floating panel
+     read as physically above the map rather than pasted onto it. */
+  --shadow-panel: 0 1px 2px rgb(26 36 39 / 0.08), 0 8px 24px -4px rgb(26 36 39 / 0.12);
+  --shadow-float: 0 2px 4px rgb(26 36 39 / 0.10), 0 16px 40px -8px rgb(26 36 39 / 0.20);
 }
 
-/* The map is full-bleed behind everything, so the document itself must not
-   scroll or bounce — otherwise iOS rubber-banding drags the map off the
-   viewport edge. */
+/* The map is full-bleed behind everything, so the document must not scroll or
+   bounce - iOS rubber-banding would drag the map off the viewport edge. */
 html,
 body {
   overscroll-behavior: none;
