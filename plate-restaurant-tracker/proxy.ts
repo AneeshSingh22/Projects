@@ -11,9 +11,16 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Everything except Next internals and static assets. Keeping images and
-    // fonts out matters: this runs on every matched request, and each pass
-    // makes a getUser() call to Supabase.
-    "/((?!_next/static|_next/image|favicon.ico|.*\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff|woff2)$).*)",
+    // Everything except Next internals, static assets, and the PWA files.
+    //
+    // The PWA exclusions are load-bearing, not tidiness: a browser fetches the
+    // manifest and the service worker WITHOUT credentials, so the auth guard
+    // redirected both to /login. A manifest that 307s cannot be installed, and
+    // a service worker that 307s never registers - so the app silently refuses
+    // to install with no error anywhere.
+    //
+    // Keeping images and fonts out matters too: this runs on every matched
+    // request and each pass makes a getUser() call to Supabase.
+    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|.*\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff|woff2)$).*)",
   ],
 }

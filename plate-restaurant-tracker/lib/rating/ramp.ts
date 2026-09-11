@@ -26,12 +26,20 @@
 
 export type Rgb = [number, number, number]
 
+// Every stop clears WCAG AA (4.5:1) against --surface #172427, checked
+// numerically rather than by eye - section 9 requires a contrast check on this
+// ramp specifically, and ratings appear at body size in the visit list as well
+// as at 56px in the sheet.
+//
+// The top stop was originally a deeper green, rgb(45,122,62), which measured
+// 3.01:1. That passes for large text and fails for body text, so a 10 would
+// have been the least readable rating on the scale - exactly backwards.
 const STOPS: { at: number; rgb: Rgb }[] = [
-  { at: 0, rgb: [110, 132, 137] }, // muted grey-blue: bad, and quiet about it
-  { at: 4, rgb: [126, 146, 152] }, // still receding
+  { at: 0, rgb: [126, 146, 152] }, // muted grey-blue: bad, and quiet about it
+  { at: 4, rgb: [138, 156, 161] }, // still receding
   { at: 6, rgb: [201, 151, 63] }, // amber: acceptable
-  { at: 8, rgb: [106, 153, 78] }, // green: good
-  { at: 10, rgb: [45, 122, 62] }, // deep green: the best places
+  { at: 8, rgb: [116, 168, 92] }, // green: good
+  { at: 10, rgb: [101, 176, 108] }, // brighter green: the best places
 ]
 
 // Wishlist: no rating yet, so no position on the ramp at all.

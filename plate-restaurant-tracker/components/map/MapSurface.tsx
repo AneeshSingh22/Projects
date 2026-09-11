@@ -9,6 +9,7 @@ import { PoiPrompt, type PoiCandidate } from "./PoiPrompt"
 import { CustomPinPrompt, type PinCandidate } from "./CustomPinPrompt"
 import { PlaceSheet } from "@/components/visit/PlaceSheet"
 import { StorageMeter } from "@/components/visit/StorageMeter"
+import { OfflineBanner } from "@/components/pwa/OfflineBanner"
 import { getPlaces } from "@/app/actions/refresh"
 import type { PlaceMarker } from "@/types/db"
 
@@ -186,6 +187,7 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
 
       {/* Storage total - section 9, Phase 4. Free tier is 1GB and knowing where
           you stand is the difference between noticing and being surprised. */}
+      <OfflineBanner />
       <StorageMeter />
 
       {toast && (
