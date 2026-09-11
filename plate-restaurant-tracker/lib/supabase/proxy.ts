@@ -39,6 +39,17 @@ export async function updateSession(request: NextRequest) {
   const isPublic = PUBLIC_PATHS.some((p) => request.nextUrl.pathname.startsWith(p))
 
   if (!user && !isPublic) {
+    // API routes get a status code, not a redirect. A fetch() follows a 307
+    // transparently and would receive the HTML login page with a 200, so the
+    // caller sees "success" and then fails trying to parse JSON - a confusing
+    // failure a long way from its cause.
+    if (request.nextUrl.pathname.startsWith("/api/")) {
+      return NextResponse.json(
+        { ok: false, error: "Not signed in." },
+        { status: 401 },
+      )
+    }
+
     const url = request.nextUrl.clone()
     url.pathname = "/login"
     return NextResponse.redirect(url)

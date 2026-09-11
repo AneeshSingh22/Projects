@@ -3,7 +3,9 @@
 import { useState, useTransition } from "react"
 import { RatingSlider } from "./RatingSlider"
 import { logVisit, updateVisit, type VisitInput } from "@/app/actions/visits"
+import { QuickLog } from "./QuickLog"
 import type { Visit } from "@/types/db"
+import type { ParsedVisit } from "@/app/api/parse-visit/route"
 
 function todayISO(): string {
   // Local date, not UTC. toISOString() would roll over to tomorrow for anyone
@@ -57,6 +59,32 @@ export function VisitForm({
   const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
 
+  // The quick-log step is offered only for a NEW visit, never when editing -
+  // re-parsing over fields the user already corrected would be hostile.
+  // Section 9: the manual form stays fully functional and always reachable, so
+  // "Type it myself" is always one tap away.
+  const [showQuickLog, setShowQuickLog] = useState(!existing)
+  const [aiNote, setAiNote] = useState<string | null>(null)
+
+  // Applies a parse to the form. Every field is guarded: the model omits what
+  // the note did not mention, and an omitted field must leave the existing
+  // value alone rather than blanking it.
+  function applyParsed(parsed: ParsedVisit, note: string | null) {
+    if (parsed.visitedOn && /^\d{4}-\d{2}-\d{2}$/.test(parsed.visitedOn)) {
+      setVisitedOn(parsed.visitedOn)
+    }
+    if (typeof parsed.rating === "number") {
+      setRating(Math.min(10, Math.max(0, parsed.rating)))
+    }
+    if (parsed.dishes?.length) setDishes(parsed.dishes.join(", "))
+    if (parsed.companions?.length) setCompanions(parsed.companions.join(", "))
+    if (typeof parsed.pricePaid === "number") setPrice(String(parsed.pricePaid))
+    if (typeof parsed.wouldReturn === "boolean") setWouldReturn(parsed.wouldReturn)
+    if (parsed.notes) setNotes(parsed.notes)
+    setAiNote(note)
+    setShowQuickLog(false)
+  }
+
   function save() {
     const input: VisitInput = {
       placeId,
@@ -87,8 +115,20 @@ export function VisitForm({
     })
   }
 
+  if (showQuickLog) {
+    return (
+      <QuickLog onParsed={applyParsed} onSkip={() => setShowQuickLog(false)} />
+    )
+  }
+
   return (
     <div className="space-y-4">
+      {aiNote && (
+        <p className="border-line text-text-dim rounded-xl border px-3 py-2 text-xs">
+          {aiNote}
+        </p>
+      )}
+
       <RatingSlider value={rating} onChange={setRating} />
 
       <div>
