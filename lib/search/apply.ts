@@ -50,6 +50,9 @@ function normalise(s: string): string {
 export type SearchResult = {
   place: SearchablePlace
   distanceKm: number | null
+  // How many of the question's descriptive words this place matched. Used only
+  // for ordering - see the reasoning where it is computed.
+  textScore: number
 }
 
 export function applyFilters(
@@ -100,42 +103,53 @@ export function applyFilters(
       if (!hit) return false
     }
 
-    if (text) {
-      const haystack = normalise(
-        [p.name, p.cuisine ?? "", ...(p.details ?? [])].join(" "),
-      )
-      // ANY word matching is enough, not every word.
-      //
-      // Requiring all of them was tried first and was wrong. Asked "basketball
-      // courts I have been to", the model correctly sets category=sports and
-      // also redundantly sets text="basketball courts" - and requiring both
-      // words in the name excluded "Kennedy Recreation Center", so the question
-      // returned nothing while the place sat right there on the map.
-      //
-      // Being generous here is the right trade: the category, rating and
-      // visited filters already narrow hard, and a few extra results are much
-      // better than a confident empty list.
-      const words = text.split(/\s+/).filter((w) => w.length > 2)
-      if (words.length > 0 && !words.some((w) => haystack.includes(w))) {
-        return false
-      }
-    }
-
+    // NOTE: text is deliberately NOT a filter. See the scoring below.
     return true
   })
 
-  const results: SearchResult[] = matched.map((place) => ({
-    place,
-    distanceKm: origin ? distanceKm(origin, place) : null,
-  }))
+  // Text ranks rather than excludes.
+  //
+  // It was a hard filter first, and that was wrong in a way real data exposed
+  // immediately. Asked "basketball courts I have been to", the model emits
+  // category=sports plus text="basketball courts". Kennedy Recreation Center
+  // is categorised sports and was visited - but its visit recorded only a
+  // rating, with no activity text - so nothing about it contains the word
+  // "basketball", and the question returned nothing while the place sat
+  // visible on the map.
+  //
+  // The structured filters above are reliable because they come from real
+  // columns. Text is a guess about wording the user may never have typed.
+  // A guess must not be able to veto a certain match, so it only sorts.
+  const words = text ? text.split(/\s+/).filter((w) => w.length > 2) : []
+
+  const scored = matched.map((place) => {
+    const haystack = normalise(
+      [place.name, place.cuisine ?? "", ...(place.details ?? [])].join(" "),
+    )
+    return {
+      place,
+      distanceKm: origin ? distanceKm(origin, place) : null,
+      textScore: words.filter((w) => haystack.includes(w)).length,
+    }
+  })
+
+  const results: SearchResult[] = scored
 
   // Nearest first when the question was about proximity, best first otherwise.
   // "cheap Thai I liked near here" is asking to walk somewhere, so distance
   // wins; "places I loved" is asking to remember, so rating wins.
   if (filters.nearMe && origin) {
-    results.sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity))
+    results.sort((a, b) => {
+      const t = b.textScore - a.textScore
+      if (t !== 0) return t
+      return (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity)
+    })
   } else {
-    results.sort((a, b) => (b.place.avg_rating ?? -1) - (a.place.avg_rating ?? -1))
+    results.sort((a, b) => {
+      const t = b.textScore - a.textScore
+      if (t !== 0) return t
+      return (b.place.avg_rating ?? -1) - (a.place.avg_rating ?? -1)
+    })
   }
 
   return results
