@@ -18,10 +18,12 @@ import { createClient } from "@/lib/supabase/server"
 //   3. Cost and speed. The payload is one sentence rather than the whole
 //      database, every time.
 
+// Same ordering lesson as parse-visit: the preview model is rate limited on
+// the free tier, so leading with it meant every question waited for a 429.
 const MODELS = [
-  "gemini-3-flash-preview",
   "gemini-3.5-flash",
   "gemini-3.1-flash-lite",
+  "gemini-3-flash-preview",
 ]
 
 const endpointFor = (model: string) =>

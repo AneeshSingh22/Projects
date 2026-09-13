@@ -60,6 +60,8 @@ export function PlaceSheet({
   const [photos, setPhotos] = useState<Record<string, SignedPhoto[]>>({})
   const [deals, setDeals] = useState<Deal[]>([])
   const [addingDeal, setAddingDeal] = useState(false)
+  const [categoryError, setCategoryError] = useState<string | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
 
   const placeId = place?.id ?? null
 
@@ -249,6 +251,15 @@ export function PlaceSheet({
           </button>
 
           <div className="flex-1 overflow-y-auto overscroll-contain px-4 pb-6">
+            {actionError && (
+              <p
+                role="alert"
+                className="text-accent border-line mt-3 rounded-xl border border-dashed px-3 py-2 text-xs"
+              >
+                {actionError}
+              </p>
+            )}
+
             <div className="flex items-start justify-between gap-4 pt-3">
               <div className="min-w-0">
                 <Drawer.Title className="font-display text-text truncate text-xl leading-tight">
@@ -267,8 +278,21 @@ export function PlaceSheet({
                     value={place.category}
                     onChange={(e) => {
                       const next = e.target.value as PlaceCategory
+                      setCategoryError(null)
                       startTransition(async () => {
-                        await updatePlaceCategory(place.id, next)
+                        // The result was previously discarded, so a rejected
+                        // write looked identical to a successful one - the
+                        // dropdown snapped back with no explanation. Any action
+                        // that can fail has to be able to say so.
+                        const r = await updatePlaceCategory(place.id, next)
+                        if (!r.ok) {
+                          setCategoryError(
+                            r.error.includes("invalid input value")
+                              ? "That category is not set up in the database yet. Run supabase/migration-nightlife.sql."
+                              : r.error,
+                          )
+                          return
+                        }
                         onChanged()
                       })
                     }}
@@ -281,6 +305,11 @@ export function PlaceSheet({
                       </option>
                     ))}
                   </select>
+                )}
+                {categoryError && (
+                  <p className="text-accent mt-1.5 text-xs leading-relaxed">
+                    {categoryError}
+                  </p>
                 )}
               </div>
               <span
@@ -388,7 +417,11 @@ export function PlaceSheet({
                                 aria-label="Delete deal"
                                 onClick={() => {
                                   startTransition(async () => {
-                                    await deleteDeal(d.id)
+                                    const r = await deleteDeal(d.id)
+                                    if (!r.ok) {
+                                      setActionError(r.error)
+                                      return
+                                    }
                                     reload()
                                   })
                                 }}
@@ -475,7 +508,11 @@ export function PlaceSheet({
                               onClick={() => {
                                 if (!confirm("Delete this visit?")) return
                                 startTransition(async () => {
-                                  await deleteVisit(v.id)
+                                  const r = await deleteVisit(v.id)
+                                  if (!r.ok) {
+                                    setActionError(r.error)
+                                    return
+                                  }
                                   reload()
                                 })
                               }}
