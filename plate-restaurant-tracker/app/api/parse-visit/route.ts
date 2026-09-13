@@ -155,9 +155,18 @@ export async function POST(request: NextRequest) {
         },
   })
 
+  // Why each attempt failed. Returned to the client in development and always
+  // logged, because "unavailable" on its own is unactionable - it cannot
+  // distinguish a rate limit from a bad request from a parse failure, which is
+  // exactly the ambiguity that made this hard to diagnose.
+  const attempts: string[] = []
+
   for (const model of MODELS) {
     const remaining = deadline - Date.now()
-    if (remaining <= 500) break
+    if (remaining <= 500) {
+      attempts.push(`${model}: skipped, deadline exhausted`)
+      break
+    }
 
     try {
       const controller = new AbortController()
@@ -179,23 +188,50 @@ export async function POST(request: NextRequest) {
       // worth trying the next model for. A 400 means our request is wrong, and
       // retrying it against another model would fail identically.
       if (!res.ok) {
+        const body = await res.text().catch(() => "")
+        attempts.push(`${model}: HTTP ${res.status} ${body.slice(0, 140)}`)
         if (res.status === 400 || res.status === 401 || res.status === 403) break
         continue
       }
 
       const data = await res.json()
-      const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text
-      if (typeof raw !== "string") continue
+      const candidate = data?.candidates?.[0]
+      const raw = candidate?.content?.parts?.[0]?.text
 
-      return NextResponse.json({ ok: true, parsed: JSON.parse(raw) as ParsedVisit })
-    } catch {
-      // Timeout or network failure on this model. Try the next one if there is
-      // time left on the shared deadline.
+      if (typeof raw !== "string") {
+        // A candidate with no text usually means the response was cut off or
+        // filtered, and finishReason says which. MAX_TOKENS in particular is a
+        // silent killer: the model starts valid JSON, runs out of room, and
+        // returns a fragment that cannot be parsed.
+        attempts.push(
+          `${model}: no text (finishReason=${candidate?.finishReason ?? "none"})`,
+        )
+        continue
+      }
+
+      try {
+        return NextResponse.json({ ok: true, parsed: JSON.parse(raw) as ParsedVisit })
+      } catch {
+        attempts.push(`${model}: unparseable JSON: ${raw.slice(0, 140)}`)
+        continue
+      }
+    } catch (e) {
+      attempts.push(
+        `${model}: ${e instanceof Error ? e.name + " " + e.message : "threw"}`,
+      )
       continue
     }
   }
 
   // Every model failed. The client falls back to the empty manual form with
   // the user's typed text preserved in notes.
-  return NextResponse.json({ ok: false, error: "unavailable" }, { status: 200 })
+  console.error("[parse-visit] all models failed:", attempts)
+  return NextResponse.json(
+    {
+      ok: false,
+      error: "unavailable",
+      ...(process.env.NODE_ENV === "development" ? { attempts } : {}),
+    },
+    { status: 200 },
+  )
 }
