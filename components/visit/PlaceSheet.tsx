@@ -14,6 +14,7 @@ import type { Deal } from "@/types/db"
 import { getSignedPhotos, type SignedPhoto } from "@/app/actions/photos"
 import { PhotoUpload } from "./PhotoUpload"
 import { PhotoStrip } from "./PhotoStrip"
+import { PlaceLore } from "./PlaceLore"
 import { VisitForm } from "./VisitForm"
 import { CountUp } from "./CountUp"
 import { ratingColor, formatRating, RATING_NONE } from "@/lib/rating/ramp"
@@ -529,6 +530,10 @@ export function PlaceSheet({
                   {/* Remove the place entirely. Sits below the history rather
                       than beside the title, so it is reachable but never the
                       thing a thumb lands on by accident. */}
+                  {shown != null && shown.visitCount === 0 && place && (
+                    <PlaceLore placeId={place.id} placeName={place.name} />
+                  )}
+
                   {!addingDeal && (
                     <button
                       type="button"
