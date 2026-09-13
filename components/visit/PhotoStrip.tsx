@@ -32,6 +32,7 @@ export function PhotoStrip({
 }) {
   const [lightbox, setLightbox] = useState<SignedPhoto | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   // Escape closes the lightbox, matching every other image viewer.
   useEffect(() => {
@@ -73,6 +74,15 @@ export function PhotoStrip({
         <X className="h-6 w-6" />
       </button>
 
+      {error && (
+        <p
+          role="alert"
+          className="absolute top-16 left-1/2 -translate-x-1/2 rounded-full bg-black/70 px-3 py-1.5 text-xs text-white"
+        >
+          {error}
+        </p>
+      )}
+
       {lightbox.fullUrl && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -94,8 +104,12 @@ export function PhotoStrip({
           e.stopPropagation()
           if (!confirm("Delete this photo? This cannot be undone.")) return
           setDeleting(lightbox.id)
-          await deletePhoto(lightbox.id)
+          const r = await deletePhoto(lightbox.id)
           setDeleting(null)
+          if (!r.ok) {
+            setError(r.error)
+            return
+          }
           setLightbox(null)
           onChanged()
         }}
