@@ -6,6 +6,13 @@ import { createClient } from "@/lib/supabase/server"
 // GEMINI_API_KEY is server-only and never reaches the browser, which is why
 // this is a route rather than a client call (section 4.4).
 //
+// Model order matters and was measured, not guessed.
+//
+// gemini-3-flash-preview used to be first and is heavily rate limited on the
+// free tier. Every request waited for it to return 429 before falling through
+// to a working model, which is what made this feel slow. It is kept last as a
+// backstop rather than removed, since availability shifts.
+//
 // Model choice, revised after testing rather than from the docs.
 //
 // plan.md section 3 says "Gemini 3 Flash". The first attempt here used
@@ -21,9 +28,9 @@ import { createClient } from "@/lib/supabase/server"
 // retired or is overloaded, the next is tried. Only after all of them fail does
 // the caller fall back to the manual form.
 const MODELS = [
-  "gemini-3-flash-preview",
   "gemini-3.5-flash",
   "gemini-3.1-flash-lite",
+  "gemini-3-flash-preview",
 ]
 
 const endpointFor = (model: string) =>
@@ -33,6 +40,21 @@ const endpointFor = (model: string) =>
 // site does not justify a dependency, and this is about thirty lines.
 const RESPONSE_SCHEMA = {
   type: "OBJECT",
+  // Forces the model to consider every key in this order rather than emitting
+  // whichever subset it decides is enough. Without it, longer and more natural
+  // notes silently lost fields - a paragraph mentioning a rating, a companion
+  // and a price would come back with only one of the three.
+  propertyOrdering: [
+    "placeName",
+    "visitedOn",
+    "rating",
+    "dishes",
+    "activity",
+    "companions",
+    "pricePaid",
+    "wouldReturn",
+    "notes",
+  ],
   properties: {
     placeName: { type: "STRING" },
     visitedOn: { type: "STRING" },
@@ -100,22 +122,27 @@ export async function POST(request: NextRequest) {
   // Section 9: the app must never block on Gemini.
   const deadline = Date.now() + 12_000
 
+  // Kept deliberately SHORT. A longer, more emphatic prompt was tried first -
+  // one that walked through each field explaining what to look for - and it
+  // made extraction measurably WORSE, dropping companions and prices that the
+  // short version catches every time. Instructions compete with the note for
+  // the model's attention; the schema already says what the fields are.
   const requestBody = JSON.stringify({
         contents: [{ parts: [{ text }] }],
         systemInstruction: {
           parts: [
             {
               text:
-                `Extract details of a visit to a place from the user's note. ` +
-                `The place may be a restaurant, a venue, a court or gym, a park, ` +
-                `or anything else - do not assume it is a meal. ` +
+                `Extract visit details from the note. ` +
                 `Today is ${todayISO(tzOffset)}. ` +
-                `Dates must be YYYY-MM-DD; resolve relative dates like "last Friday" against today. ` +
-                `Rating is out of 10. ` +
-                `Omit any field the note does not mention - do not invent values. ` +
+                `Ratings are 0-10; accept forms like "9/10" or "solid 9". ` +
+                `Prices are dollars as a plain number. ` +
+                `Resolve relative dates against today. ` +
                 `dishes is for food ordered; activity is for what was done ` +
-                `somewhere that is not a restaurant. Use one or the other, not both. ` +
-                `Put anything descriptive that does not fit a field into notes.`,
+                `somewhere not about food. ` +
+                `notes holds only the leftover description - never a rating, ` +
+                `person, price or date. ` +
+                `Omit fields the note does not mention.`,
             },
           ],
         },
