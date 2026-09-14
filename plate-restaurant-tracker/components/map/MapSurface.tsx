@@ -4,7 +4,7 @@ import { useCallback, useState } from "react"
 import { Map, type MapMouseEvent } from "@vis.gl/react-google-maps"
 import { MapMountCounter } from "./MapMountCounter"
 import { SearchPill } from "./SearchPill"
-import { PinCluster } from "./PinCluster"
+import { PlacePin } from "./PlacePin"
 import { PoiPrompt, type PoiCandidate } from "./PoiPrompt"
 import { CustomPinPrompt, type PinCandidate } from "./CustomPinPrompt"
 import { PlaceSheet } from "@/components/visit/PlaceSheet"
@@ -188,18 +188,25 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
         <MapMountCounter />
         <UserLocation fix={fix} />
         <MapController target={panTo} onDone={() => setPanTo(null)} />
-        {/* Clustered pins. Still data-driven children in the section 5 sense -
-            adding, removing or recolouring a pin re-renders this subtree and
-            never touches the map instance, so the mount count is unaffected. */}
-        <PinCluster
-          places={visiblePlaces}
-          selectedId={selectedId}
-          onSelect={(p) => {
-            setSelectedId(p.id)
-            setOpenToLog(false)
-            setPoi(null)
-          }}
-        />
+        {/* Data-driven children (section 5, Rule 3). Adding, removing or
+            recolouring a pin re-renders this subtree and never touches the map
+            instance, so the mount count is unaffected.
+
+            Clustering was tried here and reverted - see DECISIONS.md. The
+            clusterer needs DOM nodes rather than React children, and every
+            bridge to that crashed the map on load. */}
+        {visiblePlaces.map((p) => (
+          <PlacePin
+            key={p.id}
+            place={p}
+            selected={p.id === selectedId}
+            onSelect={(pl) => {
+              setSelectedId(pl.id)
+              setOpenToLog(false)
+              setPoi(null)
+            }}
+          />
+        ))}
       </Map>
 
       {/* Overlays: siblings of the map, free to re-render and unmount. */}
