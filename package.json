@@ -9,7 +9,6 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@googlemaps/markerclusterer": "^2.6.2",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.116.0",
     "@vis.gl/react-google-maps": "^1.10.0",
