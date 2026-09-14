@@ -11,7 +11,17 @@
 // image blobs themselves would work but is a real chunk of extra machinery for
 // something rarely needed offline.
 
-const VERSION = "plate-v1"
+// Cache version, derived from the build rather than typed by hand.
+//
+// A hand-maintained constant has the same flaw as any manual release step: it
+// gets forgotten, and the failure is invisible. That is exactly what happened -
+// features deployed correctly and never appeared, because this worker kept
+// serving the previous build's JavaScript from a cache that was never evicted.
+//
+// __BUILD_ID__ is replaced at build time (see scripts/stamp-sw.mjs), so every
+// deploy produces a new cache name and the activate handler below drops every
+// older one. Nothing to remember.
+const VERSION = "plate-a484e7643a"
 const SHELL = `${VERSION}-shell`
 const DATA = `${VERSION}-data`
 
@@ -67,6 +77,10 @@ self.addEventListener("fetch", (event) => {
   // Navigations: network first, falling back to the cached shell. The app must
   // show fresh data when online, and something rather than a browser error
   // page when not.
+  //
+  // Network-first is load-bearing for updates as well as data: the HTML names
+  // which hashed JS bundle to load, so serving stale HTML pins the whole app to
+  // an old build.
   if (request.mode === "navigate") {
     event.respondWith(
       fetch(request)
@@ -85,8 +99,9 @@ self.addEventListener("fetch", (event) => {
     return
   }
 
-  // Build assets are content-hashed, so a cache hit is always correct and a
-  // network trip is always wasted.
+  // Build assets are content-hashed, so a cache hit is always correct for THAT
+  // url and a network trip is wasted. Stale bundles are handled by the VERSION
+  // bump above evicting the whole cache, not by re-fetching individual files.
   if (url.pathname.startsWith("/_next/static/")) {
     event.respondWith(
       caches.match(request).then(
