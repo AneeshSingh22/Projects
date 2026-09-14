@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import { RatingSlider } from "./RatingSlider"
+import { RatingDial } from "./RatingDial"
 import { logVisit, updateVisit, type VisitInput } from "@/app/actions/visits"
 import { QuickLog } from "./QuickLog"
 import type { Visit } from "@/types/db"
@@ -147,7 +147,10 @@ export function VisitForm({
         </p>
       )}
 
-      <RatingSlider value={rating} onChange={setRating} />
+      {/* The dial replaces the slider from section 9. Same behaviour - live
+          colour along the ramp as you drag - arranged so the 56px numeral sits
+          inside the control rather than beside it. */}
+      <RatingDial value={rating} onChange={setRating} />
 
       <div>
         <label htmlFor="visited-on" className="text-text-dim text-sm">
