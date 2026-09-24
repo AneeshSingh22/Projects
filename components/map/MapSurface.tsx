@@ -225,9 +225,17 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
         }`}
       >
         <div className="flex items-start gap-3">
+          {/* relative, so each open panel anchors to its own trigger on
+              desktop. On a phone PanelShell ignores this and pins itself to the
+              viewport instead - which is the fix for the close button being
+              squashed out of reach inside this row. */}
           <div className="flex items-start gap-2">
-            <DealsPanel onSelectPlace={flyToPlace} />
-            <StatsPanel onSelectPlace={flyToPlace} />
+            <div className="relative">
+              <DealsPanel onSelectPlace={flyToPlace} />
+            </div>
+            <div className="relative">
+              <StatsPanel onSelectPlace={flyToPlace} />
+            </div>
           </div>
 
           {/* Hidden on phones, where it lives in the row below instead. */}
@@ -238,7 +246,7 @@ export function MapSurface({ initialPlaces }: { initialPlaces: PlaceMarker[] }) 
           </div>
 
           {/* Pushes the count to the right edge once the bar above is hidden. */}
-          <div className="ml-auto sm:ml-0">
+          <div className="relative ml-auto sm:ml-0">
             <CategoryPanel
               places={places}
               activeFilter={filter}

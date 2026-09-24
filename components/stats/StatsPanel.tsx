@@ -1,7 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { BarChart3, X, Clock, Wallet, Sparkles, Camera } from "lucide-react"
+import { BarChart3, Clock, Wallet, Sparkles, Camera } from "lucide-react"
+import { PanelShell } from "@/components/ui/panel-shell"
 import { getStats, type Stats, type TimelineVisit } from "@/app/actions/stats"
 import { CATEGORIES } from "@/lib/categories"
 import { ratingColor, formatRating } from "@/lib/rating/ramp"
@@ -72,23 +73,15 @@ export function StatsPanel({
   }
 
   return (
-    <div
-      className="bg-surface/97 border-line pointer-events-auto flex h-[78dvh] w-[min(92vw,420px)] flex-col overflow-hidden rounded-3xl border backdrop-blur-2xl duration-300 ease-out animate-in fade-in slide-in-from-top-4"
-      style={{ boxShadow: "var(--shadow-float)" }}
+    <PanelShell
+      title={<span className="font-display text-text text-base">History</span>}
+      onClose={() => setOpen(false)}
+      widthClass="sm:w-[420px]"
     >
-      <header className="border-line flex shrink-0 items-center justify-between border-b px-4 py-3.5">
-        <span className="font-display text-text text-base">History</span>
-        <button
-          type="button"
-          onClick={() => setOpen(false)}
-          aria-label="Close"
-          className="text-text-dim hover:text-text hover:bg-surface-raised rounded-full p-1.5 transition-colors"
-        >
-          <X className="h-4 w-4" />
-        </button>
-      </header>
-
-      <nav className="border-line flex shrink-0 border-b">
+      {/* Tabs sit inside the scrolling region's sibling slot rather than the
+          header, so the header stays minimal and the close button is never
+          competing for width with three tab labels. */}
+      <nav className="border-line bg-surface/95 sticky top-0 z-10 flex shrink-0 border-b backdrop-blur-sm">
         {(
           [
             ["timeline", "Timeline", Clock],
@@ -100,7 +93,7 @@ export function StatsPanel({
             key={id}
             type="button"
             onClick={() => setTab(id)}
-            className={`flex flex-1 items-center justify-center gap-1.5 py-2.5 text-xs transition-colors ${
+            className={`flex flex-1 items-center justify-center gap-1.5 py-3 text-xs transition-colors ${
               tab === id
                 ? "text-text border-accent border-b-2"
                 : "text-text-dim hover:text-text border-b-2 border-transparent"
@@ -112,23 +105,21 @@ export function StatsPanel({
         ))}
       </nav>
 
-      <div className="flex-1 overflow-y-auto overscroll-contain">
-        {stats == null ? (
-          <p className="text-text-dim px-4 py-6 text-sm">Loading…</p>
-        ) : stats.visits.length === 0 ? (
-          <p className="text-text-dim px-4 py-6 text-sm leading-relaxed">
-            Nothing logged yet. Once you start recording visits, this is where
-            the history, spending and trends show up.
-          </p>
-        ) : tab === "timeline" ? (
-          <Timeline visits={stats.visits} onSelectPlace={onSelectPlace} />
-        ) : tab === "budget" ? (
-          <Budget stats={stats} />
-        ) : (
-          <Review stats={stats} />
-        )}
-      </div>
-    </div>
+      {stats == null ? (
+        <p className="text-text-dim px-4 py-6 text-sm">Loading…</p>
+      ) : stats.visits.length === 0 ? (
+        <p className="text-text-dim px-4 py-6 text-sm leading-relaxed">
+          Nothing logged yet. Once you start recording visits, this is where the
+          history, spending and trends show up.
+        </p>
+      ) : tab === "timeline" ? (
+        <Timeline visits={stats.visits} onSelectPlace={onSelectPlace} />
+      ) : tab === "budget" ? (
+        <Budget stats={stats} />
+      ) : (
+        <Review stats={stats} />
+      )}
+    </PanelShell>
   )
 }
 
