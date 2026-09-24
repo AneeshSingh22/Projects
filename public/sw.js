@@ -21,7 +21,7 @@
 // __BUILD_ID__ is replaced at build time (see scripts/stamp-sw.mjs), so every
 // deploy produces a new cache name and the activate handler below drops every
 // older one. Nothing to remember.
-const VERSION = "plate-a484e7643a"
+const VERSION = "plate-c7cf34a00a"
 const SHELL = `${VERSION}-shell`
 const DATA = `${VERSION}-data`
 
