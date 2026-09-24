@@ -1,7 +1,8 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { ChevronLeft, X } from "lucide-react"
+import { ChevronLeft } from "lucide-react"
+import { PanelShell } from "@/components/ui/panel-shell"
 import { CATEGORIES, CATEGORY_ORDER, type PlaceCategory } from "@/lib/categories"
 import { ratingColor, formatRating, RATING_NONE } from "@/lib/rating/ramp"
 import type { PlaceMarker } from "@/types/db"
@@ -76,108 +77,100 @@ export function CategoryPanel({
   const list = activeFilter ? grouped[activeFilter] : null
 
   return (
-    <div
-      className="bg-surface/97 border-line pointer-events-auto w-72 overflow-hidden rounded-2xl border backdrop-blur-xl duration-200 animate-in fade-in slide-in-from-top-2"
-      style={{ boxShadow: "var(--shadow-panel)" }}
-    >
-      <div className="border-line flex items-center justify-between border-b px-4 py-3">
-        {activeFilter ? (
+    <PanelShell
+      title={
+        activeFilter ? (
           <button
             type="button"
             onClick={() => onFilterChange(null)}
-            className="text-text hover:text-text flex items-center gap-1.5 text-sm"
+            className="text-text flex min-w-0 items-center gap-1.5 text-sm"
           >
-            <ChevronLeft className="h-4 w-4" />
-            All places
+            <ChevronLeft className="h-4 w-4 shrink-0" />
+            <span className="truncate">All places</span>
           </button>
         ) : (
           <span className="text-text-dim text-xs">Filter by kind</span>
-        )}
-        <button
-          type="button"
-          onClick={close}
-          aria-label="Close"
-          className="text-text-dim hover:text-text hover:bg-surface-raised rounded-full p-1.5 transition-colors"
-        >
-          <X className="h-4 w-4" />
-        </button>
-      </div>
-
+        )
+      }
+      onClose={close}
+      // Anchored to the right: this pill sits at the right edge of the top bar,
+      // so a left-aligned dropdown would run off the viewport.
+      alignClass="sm:right-0"
+      footer={
+        !activeFilter ? (
+          <p className="text-text-dim px-4 py-2.5 text-[11px] leading-relaxed">
+            Tap a kind to show only those on the map.
+          </p>
+        ) : undefined
+      }
+    >
       {/* While filtered, say so plainly. The map is hiding pins, and the user
           needs to know that is deliberate and how to undo it. */}
       {activeFilter && (
-        <p className="bg-accent/10 text-text border-line border-b px-4 py-2 text-xs">
+        <p className="bg-accent/10 text-text border-line sticky top-0 border-b px-4 py-2 text-xs backdrop-blur-sm">
           Showing {grouped[activeFilter].length}{" "}
           {CATEGORIES[activeFilter].label.toLowerCase()} on the map
         </p>
       )}
 
-      <div className="max-h-[55dvh] overflow-y-auto overscroll-contain">
-        {list ? (
-          list.length === 0 ? (
-            <p className="text-text-dim px-4 py-4 text-xs">
-              Nothing in this category yet.
-            </p>
-          ) : (
-            <ul>
-              {list.map((p) => (
-                <li key={p.id}>
-                  <button
-                    type="button"
-                    onClick={() => onSelectPlace(p)}
-                    className="hover:bg-surface-raised border-line flex w-full items-center justify-between gap-2 border-b px-4 py-3 text-left transition-colors last:border-b-0"
-                  >
-                    <span className="text-text truncate text-sm">{p.name}</span>
-                    <span
-                      className="font-display shrink-0 text-sm tabular-nums"
-                      style={{
-                        color:
-                          p.avg_rating == null
-                            ? RATING_NONE
-                            : ratingColor(p.avg_rating),
-                      }}
-                    >
-                      {p.avg_rating == null ? "–" : formatRating(p.avg_rating)}
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )
+      {list ? (
+        list.length === 0 ? (
+          <p className="text-text-dim px-4 py-4 text-xs">
+            Nothing in this category yet.
+          </p>
         ) : (
           <ul>
-            {CATEGORY_ORDER.map((c) => {
-              const Icon = CATEGORIES[c].icon
-              const count = grouped[c].length
-              return (
-                <li key={c}>
-                  <button
-                    type="button"
-                    // One tap does both jobs: filter the map, show the list.
-                    onClick={() => onFilterChange(c)}
-                    disabled={count === 0}
-                    className="hover:bg-surface-raised border-line flex w-full items-center gap-2.5 border-b px-4 py-3 text-left transition-colors last:border-b-0 disabled:opacity-40 disabled:hover:bg-transparent"
+            {list.map((p) => (
+              <li key={p.id}>
+                <button
+                  type="button"
+                  onClick={() => onSelectPlace(p)}
+                  className="hover:bg-surface-raised border-line flex w-full items-center justify-between gap-2 border-b px-4 py-3 text-left transition-colors last:border-b-0"
+                >
+                  <span className="text-text truncate text-sm">{p.name}</span>
+                  <span
+                    className="font-display shrink-0 text-sm tabular-nums"
+                    style={{
+                      color:
+                        p.avg_rating == null
+                          ? RATING_NONE
+                          : ratingColor(p.avg_rating),
+                    }}
                   >
-                    <Icon className="text-text-dim h-4 w-4 shrink-0" />
-                    <span className="text-text flex-1 truncate text-sm">
-                      {CATEGORIES[c].label}
-                    </span>
-                    <span className="text-text-dim text-sm tabular-nums">
-                      {count}
-                    </span>
-                  </button>
-                </li>
-              )
-            })}
+                    {p.avg_rating == null ? "–" : formatRating(p.avg_rating)}
+                  </span>
+                </button>
+              </li>
+            ))}
           </ul>
-        )}
-      </div>
-
-      {!activeFilter && (
-        <p className="border-line text-text-dim border-t px-4 py-2 text-[11px] leading-relaxed">
-          Tap a kind to show only those on the map.
-        </p>
+        )
+      ) : (
+        <ul>
+          {CATEGORY_ORDER.map((c) => {
+            const Icon = CATEGORIES[c].icon
+            const count = grouped[c].length
+            return (
+              <li key={c}>
+                <button
+                  type="button"
+                  // One tap does both jobs: filter the map, show the list.
+                  onClick={() => onFilterChange(c)}
+                  disabled={count === 0}
+                  className="hover:bg-surface-raised border-line flex w-full items-center gap-2.5 border-b px-4 py-3 text-left transition-colors last:border-b-0 disabled:opacity-40 disabled:hover:bg-transparent"
+                >
+                  <Icon className="text-text-dim h-4 w-4 shrink-0" />
+                  <span className="text-text flex-1 truncate text-sm">
+                    {CATEGORIES[c].label}
+                  </span>
+                  <span className="text-text-dim text-sm tabular-nums">
+                    {count}
+                  </span>
+                </button>
+              </li>
+            )
+          })}
+        </ul>
       )}
-    </div>
+    </PanelShell>
   )
 }
